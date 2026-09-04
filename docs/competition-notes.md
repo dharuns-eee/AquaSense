@@ -12,15 +12,15 @@ AquaSense is a SONAR subsystem/payload intended to be integrated into an AUV, no
 
 ## Core loop
 
-**Sense → Decide → Adapt → Transmit → Analyse & Feedback**
+**Sense → Decide → Adapt → Transmit → Analyse**
 
 ## Main innovation areas
 
 - Software-defined waveform generation
 - Environment-aware waveform selection
-- Battery-aware transmission control
-- Hardware-assisted real-time waveform streaming
-- Closed-loop signal analysis and feedback
+- Real-time adaptive transmission
+- Hardware-assisted waveform streaming
+- Efficient low-power embedded implementation
 
 ## Evidence policy
 
