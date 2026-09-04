@@ -1,0 +1,19 @@
+# STM32 / embedded build outputs
+Debug/
+Release/
+build/
+*.elf
+*.hex
+*.bin
+*.map
+*.o
+*.d
+
+# IDE / workspace files
+.vscode/
+.settings/
+.metadata/
+
+# Generated analysis outputs
+__pycache__/
+*.pyc
