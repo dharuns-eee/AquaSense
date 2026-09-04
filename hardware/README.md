@@ -9,7 +9,7 @@ AquaSense is designed as a SONAR transmitter payload/subsystem for an AUV.
 - 12-bit high-speed DAC
 - Low-pass filter
 - Class-D amplifier + MOSFET stage
-- Underwater acoustic transducer
+- Underwater acoustic transducer / oscilloscope measurement setup
 
 ## Validation Setup
 
