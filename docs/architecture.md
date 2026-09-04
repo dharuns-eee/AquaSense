@@ -4,7 +4,7 @@ AquaSense is a low-power, real-time adaptive software-defined SONAR transmitter 
 
 ## System Flow
 
-Sense → Decide → Adapt → Transmit → Analyse & Feedback
+**Sense → Decide → Adapt → Transmit → Analyse**
 
 ## Inputs
 
@@ -13,11 +13,10 @@ Sense → Decide → Adapt → Transmit → Analyse & Feedback
 - Depth
 - Turbidity
 - Target motion / Doppler conditions
-- Battery level
 
 ## Processing
 
-Adaptive decision logic selects suitable waveform and transmission parameters based on mission and environmental conditions.
+Adaptive decision logic evaluates environmental and mission conditions and selects a suitable software-defined waveform and transmission parameters.
 
 ## Signal Path
 
@@ -35,11 +34,9 @@ Low-Pass Filtering
 ↓
 Class-D + MOSFET Stage
 ↓
-SONAR Transducer / Payload
+SONAR Transducer / Oscilloscope
 ↓
 FFT / Spectrogram / Performance Analysis
-↓
-Closed-Loop Feedback
 
 ## Status
 
