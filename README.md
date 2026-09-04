@@ -2,11 +2,10 @@
 
 **Adaptive SONAR for Autonomous Underwater Vehicles (AUVs)**
 
-AquaSense is a low-power, real-time, software-defined SONAR transmitter payload designed for Autonomous Underwater Vehicles (AUVs). The system is designed to sense changing underwater conditions, select an appropriate transmit waveform, generate it on an embedded controller, and adapt transmission while considering available battery power.
-
+AquaSense is a low-power, real-time, software-defined SONAR transmitter payload designed for Autonomous Underwater Vehicles (AUVs). The system is designed to sense changing underwater conditions, select an appropriate transmit waveform, generate it on an embedded controller, and adapt transmission.
 ## Core Idea
 
-**Sense → Decide → Adapt → Transmit → Analyse & Feedback**
+**Sense → Decide → Adapt → Transmit → Analyse**
 
 AquaSense considers mission factors such as:
 
@@ -15,7 +14,6 @@ AquaSense considers mission factors such as:
 - Depth
 - Turbidity
 - Target motion / Doppler conditions
-- Battery level
 
 The adaptive decision system can select among software-defined waveforms such as:
 
@@ -41,18 +39,15 @@ Environmental / Mission Inputs
           ↓
    Class-D + MOSFET Stage
           ↓
-   SONAR Transducer / Payload
+   SONAR Oscilloscope / Transducer
           ↓
  FFT / Spectrogram / Performance Analysis
-          ↓
-      Closed-Loop Feedback
 ```
 
 ## Hardware
 
 - STM32G4-series MCU
-- SAR ADC
-- 12-bit high-speed DAC
+- ADC and DAC
 - Low-pass filter
 - Class-D amplifier + MOSFET
 - Underwater acoustic transducer
