@@ -1,6 +1,6 @@
 # Signal Processing
 
-AquaSense uses signal analysis to verify transmitted waveforms and provide feedback for the adaptive system.
+AquaSense uses signal analysis to verify and characterize transmitted waveforms and to evaluate adaptive waveform-selection behavior.
 
 ## Analysis Methods
 
@@ -8,7 +8,6 @@ AquaSense uses signal analysis to verify transmitted waveforms and provide feedb
 - Spectrum analysis
 - Spectrogram
 - Performance metrics
-- Closed-loop feedback
 
 ## Signal Model
 
