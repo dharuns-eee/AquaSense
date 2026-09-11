@@ -1,4 +1,4 @@
-# STM32 / embedded build outputs
+# Embedded build outputs
 Debug/
 Release/
 build/
@@ -9,11 +9,26 @@ build/
 *.o
 *.d
 
+# Arduino / ESP32 generated files
+*.ino.elf
+*.ino.bin
+*.ino.map
+
 # IDE / workspace files
 .vscode/
 .settings/
 .metadata/
 
-# Generated analysis outputs
+# Python generated files
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Local Python environments
+.venv/
+venv/
+env/
+
+# Local serial/demo artifacts
+*.log
