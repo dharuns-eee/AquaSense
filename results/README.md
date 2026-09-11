@@ -1,152 +1,69 @@
 # Results
 
-The `results/` directory is reserved for **validated AquaSense measurements, experiment records and analysis outputs**. It is intentionally kept separate from design documentation so that measured evidence can be distinguished from planned behaviour and design assumptions.
+The `results/` directory separates **demonstration evidence** from future measured experimental results.
 
-## Why This Folder Matters
+## Current Demonstration Evidence
 
-AquaSense contains adaptive waveform-selection logic, embedded waveform generation and a physical transmitter chain. The results directory will eventually provide evidence for how these parts behave when tested.
+The final digital prototype demonstrates:
 
-The repository should not claim experimental performance before the corresponding measurement has been completed.
+- ESP32 waveform generation.
+- Stationary sequence: `LFM → PCP`.
+- Non-stationary sequence: `HFM → LFM → PCP`.
+- Serial transfer to Python at 115200 baud.
+- Combined time-domain visualization.
+- Hann-windowed FFT calculation.
+- 0–500 kHz presentation display.
 
-## Planned Result Categories
+The Python dashboard also includes a controlled presentation spectrum. This is **visualization data for the competition demo**, not a measured underwater acoustic spectrum.
 
-### 1. Waveform Generation
+## System-Level / Simulation Evidence
 
-Results may include captures and data for:
+The MATLAB/Simulink material demonstrates the broader AquaSense architecture, including representative depth, temperature, salinity and turbidity profiles, adaptive parameters, waveform generation/scheduling and output analysis.
 
-- LFM generation.
-- HFM generation.
-- Phase-Coded Pulse generation.
-- Geometric-sweep generation.
+These figures should be treated as **model/simulation evidence** unless a figure is explicitly backed by a physical measurement.
 
-Possible checks include waveform shape, timing, frequency progression and sample-generation accuracy.
+## Future Physical Results
 
-### 2. Adaptive Waveform Selection
+The repository can later contain:
 
-The adaptive logic can be evaluated using representative input conditions.
+- DAC captures.
+- Filtered waveform captures.
+- Amplifier/MOSFET measurements.
+- Transducer measurements.
+- Receiver-based target observations.
+- FFT and spectrograms from measured signals.
+- Processing-time measurements.
+- Memory/DMA/timer observations.
+- Power measurements.
+- Controlled underwater test results.
 
-A future result record may contain:
-
-```text
-Input Conditions
-      ↓
-Expected Decision State
-      ↓
-Actual Decision State
-      ↓
-Selected Waveform
-      ↓
-Observed Output
-```
-
-This will help demonstrate whether the implemented decision rules produce the intended waveform-selection behaviour.
-
-### 3. Oscilloscope Measurements
-
-Physical waveform captures may be added for the transmitter chain, including:
-
-- DAC output.
-- Filtered analog output.
-- Amplifier-stage output where measurable.
-- SONAR transducer / oscilloscope test setup.
-- Waveform-mode comparisons.
-
-Each measurement should identify the relevant test condition and measurement point.
-
-### 4. FFT and Spectrum Results
-
-Frequency-domain results may include:
-
-- FFT plots.
-- Spectrum analysis.
-- Dominant-frequency observations.
-- Frequency-sweep verification.
-- Comparison between expected and measured spectral behaviour.
-
-### 5. Spectrogram Results
-
-Spectrograms can be used to visualize time-varying frequency content, particularly for LFM, HFM and geometric-sweep signals.
-
-Potential records may compare the configured sweep with the measured output.
-
-### 6. Embedded Performance
-
-Once the firmware is measured on hardware, this directory may contain observations related to:
-
-- Processing time.
-- DMA activity.
-- Timer-driven waveform transmission.
-- CPU activity during transmission.
-- Memory usage where relevant.
-
-### 7. Power Measurements
-
-Low-power operation is part of the project objective. Validated measurements may include:
-
-- MCU activity during waveform generation.
-- Transmission-stage power.
-- Average transmission power.
-- Continuous versus duty-cycled operation.
-
-Power values should always include the measurement conditions and instrumentation used.
-
-### 8. Controlled Underwater Tests
-
-Future underwater experiments may record:
-
-- Test environment.
-- Sensor/input conditions.
-- Selected waveform.
-- Transmission configuration.
-- Measurement setup.
-- Observed waveform characteristics.
-- Repeatability across test runs.
-
-## Recommended Result Format
-
-Each experiment should ideally record:
+## Recommended Result Record
 
 | Field | Description |
 |---|---|
 | Test ID | Unique experiment identifier |
-| Date | Date of measurement |
+| Date | Measurement date |
 | Setup | Hardware/software configuration |
-| Inputs | Environmental or representative input conditions |
-| Waveform | Selected waveform mode |
-| Parameters | Relevant waveform parameters |
-| Instrumentation | Measurement equipment used |
-| Observation | Main measured behaviour |
-| Files | Associated plots, captures or datasets |
+| Inputs | Environmental or representative inputs |
+| Target state | Stationary / non-stationary / other |
+| Waveform | LFM / HFM / PCP / Geometric |
+| Parameters | Frequency, duration, sampling and other settings |
+| Instrumentation | Oscilloscope, analyser, power meter, etc. |
+| Observation | Measured behaviour |
+| Files | Related plots, captures or datasets |
 | Status | Validated / requires review |
-
-## Suggested Directory Structure
-
-```text
-results/
-├── README.md
-├── waveform-generation/
-├── adaptive-selection/
-├── oscilloscope/
-├── fft/
-├── spectrogram/
-├── embedded-performance/
-├── power/
-└── underwater-tests/
-```
-
-The subdirectories can be created when actual result files become available.
 
 ## Evidence Policy
 
-The following distinction should be maintained:
+AquaSense uses four evidence categories:
 
-- **Design** — what the system is intended to do.
-- **Simulation** — behaviour observed in software or a model.
-- **Prototype measurement** — behaviour observed on the physical hardware.
-- **Underwater validation** — behaviour observed during controlled water testing.
+1. **Design** — intended architecture and algorithms.
+2. **Simulation/model** — MATLAB/Simulink or other representative software behaviour.
+3. **Prototype demonstration** — ESP32 + Python digital demonstration.
+4. **Physical/underwater validation** — measured hardware or acoustic results.
 
-Do not use simulated or expected values as substitutes for measured experimental results.
+Simulated, representative or presentation-only values must not be reported as physical measurements.
 
 ## Current Status
 
-No experimental result files are being added at this stage. The folder is prepared for future validated waveform captures, signal-analysis plots, embedded measurements, power measurements and controlled underwater test results.
+The active competition result is the **digital ESP32/Python demonstration**. Physical acoustic receiver/transducer validation, quantitative power measurements and controlled underwater testing remain future stages.
