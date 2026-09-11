@@ -26,22 +26,24 @@ The figure shows the generated HFM and LFM waveforms, Hann-windowed FFT results,
 
 ### 3. Final Screen-Recorded Demonstration
 
-The final screen recording demonstrates the AquaSense software workflow, including the ESP32 serial interface, target selection, adaptive waveform sequence, and Python visualization.
+The final screen recording demonstrates the AquaSense software workflow, including the ESP32 serial interface, target selection, waveform sequence, and Python visualization.
 
 **Video:** `AquaSense_Final_Demo.mp4`
 
 ## Prototype Configuration
 
-- **Controller:** ESP32
-- **Sampling rate:** 1 MHz
-- **Samples per waveform:** 1000
-- **Waveform duration:** 1 ms
-- **Frequency band:** 250–270 kHz
-- **PCP carrier:** 260 kHz
-- **PCP code:** `+ + + - - + - +`
-- **Serial communication:** 115200 baud
-- **Signal processing:** Hann window → FFT
-- **Display range:** 0–500 kHz
+| Parameter | Current prototype |
+|---|---|
+| Controller | ESP32 |
+| Sampling rate | 1 MHz |
+| Samples per waveform | 1000 |
+| Waveform duration | 1 ms |
+| Frequency band | 250–270 kHz |
+| PCP carrier | 260 kHz |
+| PCP code | `+ + + - - + - +` |
+| Serial communication | 115200 baud |
+| Signal processing | Hann window → FFT |
+| Display range | 0–500 kHz |
 
 ## Demonstration Sequences
 
