@@ -1,119 +1,69 @@
 # Firmware
 
-The `firmware/` directory contains the embedded-software design for the AquaSense SONAR transmitter payload. The firmware is responsible for interpreting condition inputs, selecting the waveform mode and producing a deterministic stream of samples for the DAC.
+The `firmware/` directory contains the embedded demonstration firmware for the AquaSense SONAR transmitter payload.
 
-## Firmware Role
+## Current Demonstration Firmware
 
-The embedded controller forms the bridge between the adaptive decision layer and the physical SONAR transmitter.
+`AquaSense_ESP32.ino` is the current ESP32 demonstration transmitter. It streams selected waveform samples over serial to the Python visualization program.
 
-```text
-Condition Inputs
-      ↓
-Adaptive Decision Logic
-      ↓
-Waveform + Parameters
-      ↓
-Sample Generation / LUT
-      ↓
-DMA + Timer
-      ↓
-DAC Output
-```
+### Demonstration parameters
 
-## Planned / Prototype Modules
+- Sampling frequency: **1 MHz**
+- Demonstration band: **250–270 kHz**
+- PCP carrier: **260 kHz**
+- Samples per waveform: **1000**
+- Serial baud rate: **115200**
+- Serial port used by the demo: **COM9**
 
-### 1. Input handling
-
-- Read representative environmental-condition inputs.
-- Convert raw ADC values into usable condition variables.
-- Apply basic scaling or normalization where required.
-- Provide the decision layer with stable input values.
-
-### 2. Adaptive decision logic
-
-- Evaluate configured environmental and mission conditions.
-- Determine the current operating state.
-- Select the appropriate waveform mode.
-- Load the associated waveform parameters.
-- Keep decision rules configurable for experimentation.
-
-### 3. Waveform generation
-
-The firmware is intended to support:
-
-- LFM generation.
-- HFM generation.
-- Phase-Coded Pulse generation.
-- Geometric frequency sweeps.
-- Configurable amplitude and timing parameters.
-- Precomputed waveform sample tables.
-
-### 4. Look-Up Tables (LUTs)
-
-LUTs can store precomputed waveform samples so that the controller does not need to repeatedly evaluate the complete waveform equation during every transmission sample.
-
-A LUT-based path is conceptually:
+### Target sequences
 
 ```text
-Waveform Selection
-       ↓
-Select LUT / Parameters
-       ↓
-Sample Buffer
-       ↓
-DMA
-       ↓
-DAC
+Target 0 — Stationary
+LFM → PCP
+
+Target 1 — Non-Stationary
+HFM → LFM → PCP
 ```
 
-### 5. DAC output control
+### Waveforms
 
-The firmware configures the DAC interface and prepares digital waveform samples for conversion into the analog signal used by the transmitter chain.
+- **LFM:** linear frequency sweep from 250 kHz to 270 kHz.
+- **HFM:** hyperbolic frequency sweep across the demonstration band.
+- **PCP:** 260 kHz carrier with the 8-chip phase code `+ + + - - + - +`.
+- **Geometric sweep:** retained in the firmware as an additional software-defined waveform generator, but not used in the two final demo sequences.
 
-### 6. DMA-driven waveform streaming
+## Serial Protocol
 
-DMA is used to transfer waveform samples from memory to the DAC with limited CPU intervention. This is important for maintaining regular sample delivery during real-time transmission.
+The firmware sends a simple text protocol:
 
-### 7. Hardware timer control
+```text
+AQUASENSE_START
+TARGET,<id>,<state>
+WAVEFORM,<name>
+DATA
+<1000 samples>
+END_WAVEFORM
+...
+AQUASENSE_END
+```
 
-A hardware timer establishes the waveform sample/update timing. The relationship between timer configuration, DAC update rate and waveform samples determines the generated output frequency and sweep behaviour.
+Python sends a single character command:
 
-### 8. Interrupt management
+```text
+0 → Target 0 / Stationary
+1 → Target 1 / Non-Stationary
+```
 
-NVIC priority configuration can be used to organize time-critical embedded events and ensure that important peripheral operations receive appropriate interrupt priority.
+## Run with Python Demo
 
-### 9. CMSIS-DSP / FPU processing
+Use the companion program:
 
-Where signal-processing calculations are required, CMSIS-DSP functions and the MCU floating-point capability can be used to reduce computational overhead and improve execution efficiency.
+```bash
+python signal-processing/AquaSense_Demo.py
+```
 
-### 10. CPU duty-cycling
+Make sure the Arduino Serial Monitor is closed while the Python program is using **COM9**.
 
-WFI-based CPU inactivity can be used during periods where the processor is waiting for an interrupt or peripheral event. This supports the project's low-power embedded design objective.
+## Prototype Note
 
-## Real-Time Transmission Sequence
-
-A typical firmware execution sequence is:
-
-1. Initialize peripherals.
-2. Acquire or receive condition inputs.
-3. Evaluate the adaptive decision rules.
-4. Select the waveform mode.
-5. Load waveform parameters or LUT data.
-6. Configure the DAC, DMA and hardware timer.
-7. Start waveform transmission.
-8. Maintain deterministic sample delivery through DMA/timer hardware.
-9. Stop or update transmission at the configured boundary.
-10. Make the next decision when new operating-condition information is available.
-
-## Firmware Design Principles
-
-- Keep waveform selection separate from waveform generation.
-- Keep hardware-specific transmission functions separate from decision logic.
-- Prefer deterministic peripheral timing for waveform output.
-- Use configurable parameters rather than hard-coding experimental thresholds wherever practical.
-- Keep prototype measurements separate from unvalidated assumptions.
-- Avoid claiming performance improvements until they are experimentally demonstrated.
-
-## Current Status
-
-The repository currently documents the firmware architecture and planned/prototype modules. Source files will be added and expanded as the embedded implementation is organized and validated on the target hardware.
+This firmware is part of a **demonstration prototype**. The 250–270 kHz configuration is used to make the frequency-domain demonstration clear. It should not be presented as a measured underwater acoustic transmission result. Physical DAC, amplifier, transducer and underwater validation are separate hardware stages.
