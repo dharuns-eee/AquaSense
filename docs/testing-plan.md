@@ -1,169 +1,147 @@
 # Testing Plan
 
-AquaSense will be validated progressively, starting with digital waveform generation and moving toward hardware and controlled underwater experiments.
+AquaSense uses staged validation so that the final competition demonstration can be separated from future physical SONAR validation.
 
-The testing approach is intentionally staged so that waveform-generation errors, adaptive-decision errors and hardware-path errors can be isolated instead of evaluating the complete system as one block.
+## 1. Final Digital Demonstration — Completed Target
 
-## 1. Digital Signal Validation
-
-The first stage verifies the waveform-generation logic before connecting the signal to the physical transmission chain.
+The current prototype verifies the embedded waveform-generation and serial path.
 
 ### Checks
 
-- Verify generated waveform shape.
-- Verify configured frequency range.
-- Verify frequency-sweep behaviour.
-- Verify pulse duration and timing where applicable.
-- Compare generated samples with expected mathematical models.
-- Inspect time-domain output.
-- Inspect FFT output.
-- Inspect spectrograms for frequency-swept signals.
+- ESP32 starts correctly.
+- Python connects at the configured serial port and 115200 baud.
+- Target command `0` produces `LFM → PCP`.
+- Target command `1` produces `HFM → LFM → PCP`.
+- Each waveform contains 1000 samples.
+- Waveform names and sequence boundaries are parsed correctly.
+- Python applies a Hann window before its FFT calculation.
+- Dashboard displays the combined time-domain sequence.
+- Dashboard provides the 0–500 kHz presentation axis.
 
-## 2. Waveform-Mode Validation
-
-Each supported waveform should be tested independently before adaptive switching is evaluated.
+## 2. Waveform Checks
 
 ### LFM
 
-Verify the intended linear frequency progression and configured sweep duration.
+Verify the generated linear sweep across the configured 250–270 kHz demonstration band.
 
 ### HFM
 
-Verify the intended non-linear frequency progression and time-frequency representation.
+Verify the generated hyperbolic sweep across the same demonstration band.
 
-### Phase-Coded Pulses
+### PCP
 
-Verify pulse timing, phase-code structure and sample generation.
+Verify the 260 kHz carrier and the 8-chip code:
+
+```text
++ + + - - + - +
+```
 
 ### Geometric Sweep
 
-Verify the configured non-linear sweep progression and timing.
+Verify the mathematical generator separately when required. It is retained in firmware but is not part of the two final target sequences.
 
-## 3. Adaptive Decision Validation
+## 3. Python Signal Processing
 
-The adaptive layer should be tested independently from the analog hardware.
-
-### Procedure
-
-1. Provide a known set of representative condition inputs.
-2. Record the normalized or processed input values.
-3. Run the configured decision logic.
-4. Record the selected operating state.
-5. Record the selected waveform.
-6. Compare the result with the expected decision rule.
-7. Repeat for different input combinations.
-
-### Important checks
-
-- Stable-condition input produces the configured baseline state.
-- Turbidity-related input changes are handled according to the configured rules.
-- Temperature/depth changes are handled according to the configured rules.
-- Target-motion/Doppler-related conditions select the intended configured mode.
-- Competing conditions follow the configured priority or weighting.
-
-Thresholds and weights should be treated as design parameters until validated.
-
-## 4. Hardware Validation
-
-The physical transmitter path should be tested stage by stage.
-
-### Digital and analog checks
-
-- Verify MCU peripheral configuration.
-- Verify ADC/input readings.
-- Verify DAC output.
-- Verify filtered analog output.
-- Verify amplifier output behaviour.
-- Verify MOSFET stage operation.
-- Verify the acoustic transducer connection.
-- Capture the physical electrical waveform using an oscilloscope.
-
-## 5. DMA and Timer Validation
-
-The real-time waveform path should be checked for deterministic sample delivery.
-
-- Verify DMA transfer configuration.
-- Verify hardware timer frequency.
-- Verify DAC update timing.
-- Check for missing or repeated samples.
-- Check waveform continuity during repeated transmission.
-- Confirm that the CPU is not required to handle every individual sample transfer.
-
-## 6. Adaptive Waveform Switching Test
-
-Once individual modes and the decision logic are validated, the complete adaptive digital path can be exercised.
+The Python analysis performs:
 
 ```text
-Input Condition A
+Received signal
       ↓
-Decision State A
+Hann window
       ↓
-Waveform A
-
-Input Condition B
+rFFT
       ↓
-Decision State B
+Magnitude
       ↓
-Waveform B
+Frequency-domain presentation
 ```
 
-The test should confirm that a change in the configured input conditions causes the expected waveform selection without introducing unintended transmission behaviour.
+The dashboard is intended for clear competition demonstration. Its controlled 0–500 kHz presentation spectrum must not be interpreted as a measured underwater acoustic spectrum.
 
-## 7. Power Evaluation
+## 4. Target-State Demonstration
 
-Low-power operation remains a supporting project objective. Power measurements should be made only with suitable instrumentation.
+The current target state is software-commanded rather than physically detected.
 
-Possible measurements include:
+```text
+Menu choice
+   ↓
+0 or 1 command
+   ↓
+ESP32 selects sequence
+   ↓
+Waveforms generated
+   ↓
+Serial transfer
+   ↓
+Python validation + display
+```
 
-- MCU activity during waveform generation.
-- MCU activity during DMA-based transmission.
-- Transmission-stage power.
-- Average transmission power.
-- Continuous versus duty-cycled operation.
-- Processing overhead for different waveform-generation approaches.
+A future receiver-enabled implementation can replace the command with target-motion information derived from received acoustic data.
 
-Estimated values should be clearly separated from measured values.
+## 5. Environmental Adaptation — System-Level Validation
 
-## 8. Oscilloscope Verification
+Temperature, salinity, depth and turbidity are part of the broader AquaSense architecture and MATLAB/Simulink model. Their thresholds/weights are design parameters until experimentally validated.
 
-The oscilloscope is used to inspect the physical electrical waveform produced by the transmitter chain.
+The physical pots/environmental inputs are **not required for the final ESP32 competition demo**.
 
-Useful observations include:
+Future testing should verify:
 
-- Waveform shape.
-- Peak-to-peak amplitude.
-- Period or sweep behaviour.
-- Pulse duration.
-- Timing consistency.
-- Distortion or unexpected signal components.
+- Sensor acquisition.
+- Input normalization.
+- Decision-state calculation.
+- Waveform selection under known conditions.
+- Repeatability across input changes.
 
-Oscilloscope captures can later be stored in the `media/` directory and referenced from validated experiment records in `results/`.
+## 6. Physical Hardware Validation — Future
 
-## 9. Underwater Validation
+The intended physical transmitter chain remains:
 
-The final validation stage is planned as controlled water testing using real environmental sensors and the complete transmitter payload.
+```text
+Embedded Controller
+      ↓
+DAC
+      ↓
+Low-Pass Filter
+      ↓
+Amplifier / MOSFET Stage
+      ↓
+Transducer
+      ↓
+Oscilloscope / Receiver
+```
 
-The testing should evaluate:
+Future tests should measure the electrical output at each appropriate stage before making acoustic-performance claims.
 
-- Environmental-condition acquisition.
+## 7. Power Evaluation — Future
+
+Low power is a supporting design objective. Actual measurements should use suitable instrumentation and report the test conditions.
+
+Do not claim a quantitative power saving from the current software demonstration alone.
+
+## 8. Underwater Validation — Future
+
+A controlled underwater test should eventually evaluate:
+
+- Real environmental inputs.
 - Adaptive waveform selection.
 - Physical acoustic transmission.
-- Waveform characteristics under controlled conditions.
-- Repeatability across test runs.
-- Measured power behaviour.
+- Receiver-based target observation.
+- Doppler-related behaviour.
+- Repeatability.
+- Power consumption.
 
-The exact underwater test procedure will be documented after the laboratory setup is finalized.
+## Evidence Rules
 
-## 10. Evidence and Reporting Rules
+AquaSense distinguishes:
 
-AquaSense follows a simple evidence policy:
+- **Design** — intended architecture and decision strategy.
+- **Simulation/model** — MATLAB/Simulink behaviour using representative inputs.
+- **Digital prototype** — ESP32 waveform generation and Python analysis.
+- **Physical measurement** — oscilloscope/DAC/amplifier/transducer observations.
+- **Underwater validation** — controlled acoustic tests.
 
-- Design parameters are labelled as design parameters.
-- Planned tests are labelled as planned.
-- Simulated or representative data is not presented as measured hardware data.
-- Experimental measurements are recorded with the test conditions and instrumentation used.
-- Results are added to the repository only after they have been checked.
+Only the evidence appropriate to each category should be claimed.
 
 ## Current Status
 
-The testing plan defines the validation sequence and measurement categories. Actual measured results, oscilloscope captures, datasets and underwater test observations will be added as the corresponding experiments are completed.
+The final digital demonstration is the active competition prototype. Physical receiver/transducer validation, measured power data and controlled underwater testing remain future validation stages.
