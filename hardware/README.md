@@ -1,89 +1,98 @@
 # Hardware
 
-AquaSense is designed as a **SONAR transmitter payload/subsystem for an AUV**. The hardware provides the embedded control, digital waveform generation interface, analog conditioning and acoustic output path required to transmit software-defined SONAR waveforms.
+AquaSense is a **SONAR transmitter payload/subsystem for an AUV**. The repository distinguishes the broader intended transmitter hardware from the current ESP32 competition prototype.
 
-## Hardware Signal Chain
+## Current Competition Prototype
+
+The final live demonstration uses:
+
+- ESP32 development board
+- USB connection to a laptop
+- Python host application for serial reception and visualization
+
+The ESP32 prototype is a **digital waveform-generation and serial-streaming demonstration**. It does not currently include a SONAR receiver or a complete acoustic transmit chain.
+
+## Broader Intended Hardware Chain
 
 ```text
-STM32G4 MCU
-    ↓
-SAR ADC / Input Interface
-    ↓
-Adaptive Decision Logic
-    ↓
-Waveform Samples
-    ↓
-12-bit High-Speed DAC
-    ↓
-Low-Pass Filter
-    ↓
-Class-D Amplifier
-    ↓
-MOSFET Stage
-    ↓
-Underwater Acoustic Transducer
-    ↓
-Oscilloscope / Measurement Setup
+Environmental / Mission Inputs
+          ↓
+   Embedded Controller
+          ↓
+      High-Speed DAC
+          ↓
+     Low-Pass Filter
+          ↓
+ Class-D Amplifier / MOSFET Stage
+          ↓
+ SONAR Acoustic Transducer
+          ↓
+ Receiver / Oscilloscope
 ```
 
-## Main Hardware
+The system-level architecture and MATLAB/Simulink model use the STM32G4/SAR-ADC/DAC-oriented transmitter concept. That architecture is the planned full payload direction, not a claim that every block is present in the final ESP32 demonstration.
 
-### STM32G4-series MCU
+## System-Level Components
 
-The STM32G4-series microcontroller acts as the embedded controller for waveform selection, waveform generation and peripheral coordination. Its timer, DMA, ADC and DSP-oriented capabilities are relevant to the real-time transmitter design.
+### Embedded controller
 
-### SAR ADC
+The broader design uses an MCU to coordinate input acquisition, adaptive decisions, waveform generation and deterministic sample delivery.
 
-The ADC provides a path for acquiring representative condition inputs during prototype development. These inputs can be used to exercise the adaptive decision logic.
+### Environmental input interface
 
-### 12-bit High-Speed DAC
+Temperature, salinity, depth and turbidity are representative inputs to the system-level adaptive architecture. They are not required for the final ESP32 menu demonstration.
 
-The DAC converts the selected digital waveform samples into an analog signal suitable for the following signal-conditioning stages.
+### DAC
+
+The intended physical chain converts digital waveform samples into an analog signal before filtering and amplification.
 
 ### Low-Pass Filter
 
-The analog filter is placed after the DAC to condition the reconstructed waveform and reduce unwanted high-frequency components before amplification.
+The filter conditions the reconstructed analog waveform and suppresses unwanted components before the power stage.
 
-### Class-D Amplifier + MOSFET Stage
+### Amplifier / MOSFET Stage
 
-The amplifier and MOSFET stage provide the required drive path between the low-level DAC/filter output and the underwater acoustic transducer.
+The amplifier and switching stage provide the drive path toward the acoustic transducer.
 
-### Underwater Acoustic Transducer
+### SONAR Transducer and Receiver
 
-The transducer is the acoustic output element of the SONAR payload. It converts the conditioned electrical signal into underwater acoustic energy.
+These blocks form the future physical acoustic interface. A receiver would provide the echo information needed for real target observation and motion/Doppler analysis.
 
 ### Oscilloscope
 
-An oscilloscope is used as a physical waveform-inspection instrument during prototype validation. It allows the team to compare the observed electrical waveform with the expected digital waveform and inspect timing, amplitude and waveform shape.
+An oscilloscope can be used to inspect the physical electrical waveform at appropriate points in the transmitter chain.
 
-## Hardware-Software Interaction
+## Hardware-to-Software Relationship
 
-The hardware is intentionally organized to support software-defined waveform selection:
+```text
+System-level inputs
+      ↓
+Adaptive decision
+      ↓
+Waveform selection
+      ↓
+Digital waveform generation
+      ↓
+DAC / analog chain
+      ↓
+Acoustic output
+```
 
-1. Condition inputs are acquired through the input interface.
-2. The MCU evaluates the adaptive decision logic.
-3. A waveform mode is selected.
-4. The firmware prepares the corresponding sample sequence.
-5. DMA and a hardware timer deliver samples to the DAC.
-6. The analog chain filters and amplifies the output.
-7. The transducer provides the acoustic output.
-8. The oscilloscope can be used to inspect the physical signal during validation.
+For the current competition prototype, the last physical transmission stages are represented by the digital/serial demonstration and Python visualization.
 
-## Prototype Validation
+## Future Validation
 
-Initial validation can be performed without a complete AUV integration by checking the transmitter payload in stages:
+Future hardware validation should proceed stage by stage:
 
-- Verify MCU peripheral configuration.
-- Verify ADC/input readings.
-- Verify waveform samples generated by firmware.
-- Verify DAC output.
-- Verify filtered analog output.
-- Verify amplifier/MOSFET drive path.
-- Inspect the physical electrical waveform using an oscilloscope.
-- Verify that different input conditions produce the intended waveform-selection state.
+1. Verify controller peripherals.
+2. Verify environmental-input acquisition.
+3. Verify waveform samples.
+4. Verify DAC output.
+5. Verify filtering.
+6. Verify amplifier/MOSFET operation.
+7. Verify transducer interface.
+8. Add receiver-based target observation.
+9. Measure waveform characteristics and power.
+10. Perform controlled underwater testing.
 
-## Future Hardware Work
-
-Planned hardware work includes controlled underwater testing, integration of real environmental sensors, refinement of the analog transmission chain and eventual integration of the SONAR payload into an AUV platform.
-
-All future performance claims should be supported by measurements from the corresponding hardware setup.
+No physical acoustic-performance claim should be made until the corresponding hardware stage has been measured.
