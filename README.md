@@ -1,83 +1,94 @@
 # AquaSense
 
-**Adaptive SONAR for Autonomous Underwater Vehicles (AUVs)**
+## Adaptive SONAR Transmission for AUVs
 
-AquaSense is a **real-time, software-defined SONAR transmitter payload** designed to be integrated into an Autonomous Underwater Vehicle (AUV). The core idea is simple: instead of transmitting one fixed waveform for every underwater situation, AquaSense uses environmental and mission-condition inputs to **select a more suitable waveform dynamically**.
+AquaSense is a **software-defined SONAR transmitter payload/subsystem** intended for integration into an Autonomous Underwater Vehicle (AUV). The project explores how waveform selection can adapt to changing underwater conditions and target scenarios instead of relying on one fixed transmission strategy.
 
-> **AquaSense is the SONAR payload/subsystem — not the complete AUV.**
+> **Scope:** AquaSense is the SONAR payload/subsystem, not a complete AUV.
 
-## What Problem Does AquaSense Address?
-
-Underwater acoustic conditions are not constant. Temperature, salinity, depth, turbidity and target motion can change the way an acoustic signal behaves. A fixed SONAR transmission strategy may therefore not be equally suitable across different operating conditions.
-
-AquaSense addresses this by making the **transmit side adaptive**. The embedded controller evaluates available condition inputs, applies configured decision logic and selects one of several software-defined waveform modes.
-
-### Core Concept
-
-**Sense → Decide → Select → Generate → Transmit → Analyse**
-
-The adaptation happens before transmission:
+## Core Idea
 
 ```text
-Changing Underwater Conditions
-              ↓
-      Environmental Inputs
-              ↓
-      Adaptive Decision Logic
-              ↓
-       Waveform Selection
-              ↓
-      Software Waveform Generation
-              ↓
-       DAC + Analog Front-End
-              ↓
-       SONAR Transducer / Oscilloscope
+Changing Underwater Conditions / Mission State
+                    ↓
+          Adaptive Decision Logic
+                    ↓
+             Waveform Selection
+                    ↓
+        Software-Defined Generation
+                    ↓
+             Transmission
+                    ↓
+          Signal Processing / FFT
 ```
 
-## Adaptive Solution
+At system level, AquaSense considers representative **temperature, salinity, depth, turbidity and target-motion/Doppler conditions**. The MATLAB/Simulink material models these inputs and the broader adaptive transmitter architecture.
 
-AquaSense considers inputs such as:
+The final competition prototype intentionally focuses on the **software-defined waveform-generation and analysis path**.
 
-- **Temperature** — identifies thermal-condition changes that may influence acoustic propagation.
-- **Salinity** — represents changes in the underwater medium.
-- **Depth** — provides information about the operating environment and mission state.
-- **Turbidity** — represents changes in water clarity and operating conditions.
-- **Target motion / Doppler conditions** — represents dynamic target scenarios where waveform choice can be important.
+## Final Prototype
 
-The controller maps these inputs to a configured decision state and selects an appropriate waveform.
+The final demonstration uses an **ESP32** connected to a computer over USB serial.
 
-### Supported Waveform Modes
+### Final firmware parameters
 
-| Waveform | Role in AquaSense |
-|---|---|
-| **LFM** | Baseline frequency-swept waveform for stable operating conditions |
-| **HFM** | Frequency-swept option considered for changing and Doppler-related conditions |
-| **PCP** | Phase-coded pulse option for conditions where coded transmission is desirable |
-| **Geometric Sweep** | Alternative software-defined frequency-sweep mode |
+| Parameter | Value |
+|---|---:|
+| Sampling frequency | **1 MHz** |
+| Waveform duration | **1 ms** |
+| Samples per waveform | **1000** |
+| Demonstration band | **250–270 kHz** |
+| PCP carrier | **260 kHz** |
+| Serial baud rate | **115200** |
 
-The exact thresholds, weights and mode-selection parameters are treated as **design parameters** until validated experimentally.
+### Final target sequences
 
-## Why Software-Defined SONAR?
-
-In a conventional fixed-waveform transmitter, changing the acoustic transmission behaviour can require hardware-level changes or a separate signal-generation path. AquaSense moves waveform selection and generation into embedded firmware.
-
-This means the same transmitter hardware can be configured to generate different waveform families depending on the selected operating state.
+**Target 0 — Stationary**
 
 ```text
-Fixed SONAR
-     │
-     └── One predefined transmission strategy
-
-AquaSense
-     │
-     ├── Sense conditions
-     ├── Decide operating state
-     ├── Select waveform
-     ├── Generate waveform in firmware
-     └── Stream selected waveform through the same hardware
+LFM → PCP
 ```
 
-## System Architecture
+**Target 1 — Non-Stationary**
+
+```text
+HFM → LFM → PCP
+```
+
+The target state is **software-commanded/simulated** in this prototype. The ESP32 does not have a physical SONAR receiver, so target motion is not being detected from a measured echo. A complete SONAR implementation would use received acoustic information to infer target motion and Doppler-related behaviour.
+
+## Waveforms
+
+The firmware contains four waveform generators:
+
+- **LFM — Linear Frequency Modulation:** 250 kHz → 270 kHz linear sweep.
+- **HFM — Hyperbolic Frequency Modulation:** sweep across the 250–270 kHz demonstration band; used in the non-stationary sequence as the Doppler-aware/resilient option.
+- **PCP — Phase-Coded Pulse:** 260 kHz carrier with 8-chip code `+ + + - - + - +`.
+- **Geometric Sweep:** additional non-linear sweep generator retained in firmware but not used in the two final target sequences.
+
+The waveform equations are implemented directly in the ESP32 firmware.
+
+## Python Demonstration
+
+`signal-processing/AquaSense_Demo.py` receives the ESP32 transmission and displays one dashboard containing:
+
+1. Combined time-domain transmission.
+2. Waveform labels and sequence information.
+3. PCP as an 8-chip phase-code display.
+4. **Hann Window → FFT** processing flow.
+5. Combined FFT presentation from **0–500 kHz**.
+6. Highlighted **250–270 kHz demonstration band**.
+7. Different presentation patterns for stationary and non-stationary modes.
+
+The FFT processing applies a Hann window before calculating the real FFT magnitude.
+
+### Important demonstration note
+
+The Python dashboard includes a **controlled presentation spectrum** to make the 0–500 kHz demonstration visually clear. It is not a measured underwater acoustic spectrum and must not be reported as physical acoustic measurement data.
+
+## System-Level Architecture
+
+The broader intended transmitter chain is:
 
 ```text
 Environmental / Mission Inputs
@@ -86,226 +97,89 @@ Environmental / Mission Inputs
           ↓
     Waveform Selection
           ↓
-  LUT + DMA + Hardware Timer
+ Software Waveform Generation
+          ↓
+     LUT / Sample Buffer
+          ↓
+   DMA + Hardware Timer
           ↓
           DAC
           ↓
-    Low-Pass Filtering
+    Low-Pass Filter
           ↓
-   Class-D + MOSFET Stage
+ Class-D + MOSFET Stage
           ↓
-   SONAR Transducer / Oscilloscope
+ SONAR Acoustic Transducer
           ↓
- FFT / Spectrogram / Performance Analysis
+ Oscilloscope / FFT / Spectrogram
 ```
 
-### Architecture Stages
+The MATLAB/Simulink material represents this broader system architecture. The ESP32/Python implementation is the **final reduced competition demonstration**.
 
-1. **Input stage** — condition values are obtained from sensors or representative inputs during prototype testing.
-2. **Decision stage** — the controller evaluates the configured environmental and mission factors.
-3. **Waveform stage** — the selected waveform mode determines the signal-generation parameters.
-4. **Generation stage** — waveform samples are produced using software-defined signal-generation methods and precomputed LUTs where appropriate.
-5. **Streaming stage** — DMA and hardware timers support deterministic sample delivery to the DAC.
-6. **Analog stage** — DAC output passes through filtering and the amplifier/MOSFET stage before reaching the acoustic output path.
-7. **Analysis stage** — the physical electrical waveform can be inspected using an oscilloscope and analysed using FFT/spectrogram methods.
+## Adaptive Selection Concept
 
-## Decision Logic
+The system-level design can combine normalized condition factors with a weighted model:
 
-AquaSense can represent the score of a candidate waveform using a weighted decision model:
+$$S_i=\sum_{j=1}^{n}w_jx_j$$
 
-$$
-S_i = \sum_{j=1}^{n} w_j x_j
-$$
+and select:
 
-where:
+$$W^*=\arg\max_{W_i}S_i$$
 
-- $S_i$ = score associated with waveform option $i$
-- $x_j$ = normalized input factor
-- $w_j$ = weight assigned to that input factor
+For the final demo, the environmental-input portion is not used to drive the ESP32 menu. Instead, the demonstration directly exercises the two target-state sequences so that the adaptive transmission concept can be shown reliably.
 
-The selected waveform can then be represented as:
+Environmental thresholds and waveform-selection performance remain design/validation items rather than experimentally proven claims.
 
-$$
-W^* = \arg\max_{W_i} S_i
-$$
+## Running the Final Demo
 
-This provides a structured way to combine multiple condition inputs instead of relying on a single environmental parameter.
+Install the required Python packages:
 
-For an initial rule-based implementation, the same concept can also be expressed as condition states:
+```bash
+pip install pyserial numpy matplotlib
+```
+
+Connect the ESP32 and make sure the Arduino Serial Monitor is closed. The current Python configuration uses **COM9**.
+
+Run:
+
+```bash
+python signal-processing/AquaSense_Demo.py
+```
+
+Menu:
 
 ```text
-IF operating conditions are stable
-        → select configured baseline waveform
-
-IF turbidity condition changes significantly
-        → select configured phase-coded mode
-
-IF temperature/depth conditions shift
-        → select configured alternative sweep mode
-
-IF target motion / Doppler condition is detected
-        → consider Doppler-resilient waveform configuration
+1. Target 0 - Stationary
+2. Target 1 - Non-Stationary
+3. Quit
 ```
 
-These are **design examples**, not claims of experimentally validated performance.
+## Hardware Direction
 
-## Embedded Implementation
-
-The embedded controller is responsible for turning the selected waveform decision into a timed stream of digital samples.
-
-### Firmware responsibilities
-
-- Read and process condition inputs.
-- Maintain the current operating state.
-- Evaluate waveform-selection rules.
-- Select waveform parameters.
-- Generate or access waveform samples.
-- Transfer samples to the DAC.
-- Maintain deterministic sample timing.
-- Support signal-analysis data where required.
-
-### Hardware-assisted waveform transmission
-
-AquaSense uses a combination of:
-
-- **Look-Up Tables (LUTs)** for precomputed waveform samples.
-- **DMA** to transfer samples without requiring the CPU to handle every sample individually.
-- **Hardware timers** to establish the waveform sample/update rate.
-- **NVIC priority interrupts** for time-critical embedded events.
-- **CMSIS-DSP / FPU capabilities** for efficient signal-processing operations where required.
-- **WFI-based CPU duty-cycling** to avoid unnecessary active processing.
-
-## Hardware Stack
-
-The transmitter payload is organized around the following signal path:
+The complete payload architecture is intended to progress toward:
 
 ```text
-STM32G4 MCU
-    ↓
-SAR ADC / Input Interface
-    ↓
-Adaptive Decision Logic
-    ↓
-Waveform LUT / Generation
-    ↓
-12-bit High-Speed DAC
-    ↓
-Low-Pass Filter
-    ↓
-Class-D Amplifier + MOSFET Stage
-    ↓
-Underwater Acoustic Transducer
-    ↓
-Oscilloscope / Measurement Setup
+Embedded Controller → DAC → Low-Pass Filter
+→ Amplifier / MOSFET Stage → Transducer
+→ Measurement / Receiver
 ```
 
-### Main components
+The present ESP32 prototype demonstrates digital waveform generation and serial analysis; it does **not** claim completed physical acoustic transmission or receiver-based target detection.
 
-- STM32G4-series microcontroller
-- SAR ADC
-- 12-bit high-speed DAC
-- Low-pass filter
-- Class-D amplifier
-- MOSFET power stage
-- Underwater acoustic transducer
-- Oscilloscope for physical waveform inspection
+## Low-Power Design Intent
 
-## Signal Processing & Analysis
+Low power is a supporting AUV-oriented objective. The broader architecture considers LUTs, DMA, hardware timers, efficient DSP and controlled CPU activity. No quantitative power advantage is claimed without measurement.
 
-The signal-processing side of AquaSense is used to verify and characterize the generated transmission waveform.
+## Validation Philosophy
 
-Important analysis views include:
+AquaSense separates:
 
-- **Time-domain waveform** — checks amplitude and waveform shape.
-- **Frequency spectrum** — checks frequency content and occupied components.
-- **FFT** — provides a computational frequency-domain representation.
-- **Spectrogram** — shows how frequency content changes over time.
-- **Performance metrics** — provide a structured way to compare configured waveform modes during testing.
+- **Design:** intended system architecture and adaptive strategy.
+- **Simulation:** MATLAB/Simulink representative system behaviour.
+- **Prototype demonstration:** ESP32 waveform generation and Python visualization.
+- **Physical validation:** future DAC/transducer/receiver and controlled underwater measurements.
 
-For a general transmitted signal:
-
-$$
-s(t)=A(t)\cos\left(2\pi\int_0^t f(\tau)\,d\tau+\phi\right)
-$$
-
-For Linear Frequency Modulation:
-
-$$
-f(t)=f_0+kt
-$$
-
-where $f_0$ is the starting frequency and $k$ is the frequency-sweep rate.
-
-## Low-Power Design
-
-Low power remains an important supporting objective because the payload is intended for an AUV environment. AquaSense therefore emphasizes efficient embedded execution rather than treating power as a separate feature.
-
-The design uses hardware-assisted waveform streaming, LUT-based generation, efficient signal processing and controlled CPU activity to reduce unnecessary processing overhead.
-
-For a transmit interval:
-
-$$
-E_{\text{tx}} = P_{\text{tx}} \times T_{\text{tx}}
-$$
-
-For duty-cycled transmission:
-
-$$
-P_{\text{avg}} \approx D\,P_{\text{tx}}
-$$
-
-where $D$ represents the fraction of time spent transmitting.
-
-These equations describe the design approach; measured power values will only be reported after instrumentation and validation.
-
-## Prototype & Validation Direction
-
-The prototype development is being organized progressively:
-
-### Stage 1 — Digital waveform generation
-
-Generate and inspect LFM, HFM, PCP and geometric-sweep samples in software.
-
-### Stage 2 — Embedded waveform output
-
-Move selected waveform generation onto the STM32-based embedded platform and establish deterministic DAC sample streaming.
-
-### Stage 3 — Analog signal path
-
-Verify DAC output, filtering and amplifier/MOSFET stages before the acoustic transducer.
-
-### Stage 4 — Adaptive selection
-
-Apply representative environmental-condition inputs and verify that the configured decision logic selects the intended waveform mode.
-
-### Stage 5 — Physical waveform verification
-
-Use the oscilloscope measurement setup to inspect the transmitted electrical waveform and compare it against the expected digital waveform.
-
-### Stage 6 — Controlled underwater testing
-
-Validate the complete payload under controlled water conditions and document measured results.
-
-## Testing Philosophy
-
-AquaSense separates **design intent** from **validated experimental evidence**.
-
-The repository can contain:
-
-- Architecture and design documentation.
-- Waveform-generation logic.
-- Decision-rule definitions.
-- Test procedures.
-- Prototype implementation notes.
-- Validated measurements once experiments are completed.
-
-Unmeasured performance should not be presented as a measured result.
-
-## Current Status
-
-The repository currently documents the AquaSense architecture, adaptive waveform-selection concept, embedded implementation approach, hardware signal path and planned validation process.
-
-Media assets and experimental result files will be added as the prototype and testing work progresses.
+Simulated or presentation-only values are not presented as measured underwater results.
 
 ## Repository Structure
 
@@ -315,16 +189,21 @@ AquaSense/
 ├── docs/
 │   ├── architecture.md
 │   ├── competition-notes.md
+│   ├── final-demo.md
+│   ├── hackathon-demo.md
 │   ├── testing-plan.md
 │   └── waveform-selection.md
 ├── firmware/
+│   ├── AquaSense_ESP32.ino
 │   └── README.md
 ├── hardware/
 │   └── README.md
 ├── signal-processing/
+│   ├── AquaSense_Demo.py
 │   └── README.md
 ├── media/
-│   └── README.md
+│   ├── README.md
+│   └── captions.md
 └── results/
     └── README.md
 ```
@@ -336,4 +215,4 @@ Chennai Institute of Technology
 
 ## License
 
-This project is intended for academic, prototype and hackathon development. Add an appropriate open-source license before external reuse if required.
+Academic, prototype and hackathon project. Add an appropriate open-source license before external reuse if required.
