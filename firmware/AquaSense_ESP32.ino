@@ -2,55 +2,98 @@
 #include <math.h>
 
 // ============================================================
-// AQUASENSE - FINAL ESP32 TRANSMISSION GENERATOR
+// AQUASENSE - FINAL DEMONSTRATION TRANSMISSION GENERATOR
 // ============================================================
 
-const float FS = 100000.0;
-const float DURATION = 0.010;
-const int N = 1000;
+const float FS = 1000000.0;      // 1 MHz sampling
+const float DURATION = 0.001;   // 1 ms
+const int N = 1000;              // 1000 samples
 
-const float F0 = 1000.0;
-const float F1 = 5000.0;
-const float PCP_CARRIER = 3000.0;
+// Demonstration frequency band
+const float F0 = 250000.0;       // 250 kHz
+const float F1 = 270000.0;       // 270 kHz
+const float PCP_CARRIER = 260000.0;
+
+// ============================================================
+// LFM: 250 kHz -> 270 kHz
+// ============================================================
 
 float generateLFM(int n)
 {
   float t = (float)n / FS;
   float k = (F1 - F0) / DURATION;
-  float phase = 2.0 * PI * (F0 * t + 0.5 * k * t * t);
+
+  float phase =
+      2.0 * PI *
+      (F0 * t + 0.5 * k * t * t);
+
   return sin(phase);
 }
+
+// ============================================================
+// HFM: 250 kHz -> 270 kHz
+// ============================================================
 
 float generateHFM(int n)
 {
   float t = (float)n / FS;
   float a = (F0 - F1) / DURATION;
-  float phase = 2.0 * PI * ((F0 * F1 / a) * log((F1 + a * t) / F1));
+
+  float phase =
+      2.0 * PI *
+      ((F0 * F1 / a) *
+      log((F1 + a * t) / F1));
+
   return sin(phase);
 }
+
+// ============================================================
+// PCP: 260 kHz carrier with 8-chip phase code
+// Code: + + + - - + - +
+// ============================================================
 
 float generatePCP(int n)
 {
   float t = (float)n / FS;
 
-  const int code[8] = {1, 1, 1, -1, -1, 1, -1, 1};
+  const int code[8] =
+  {
+    1, 1, 1, -1,
+    -1, 1, -1, 1
+  };
+
   int samplesPerChip = N / 8;
   int chip = n / samplesPerChip;
 
   if (chip >= 8)
     chip = 7;
 
-  float carrier = sin(2.0 * PI * PCP_CARRIER * t);
+  float carrier =
+      sin(2.0 * PI * PCP_CARRIER * t);
+
   return code[chip] * carrier;
 }
+
+// ============================================================
+// GEOMETRIC SWEEP
+// ============================================================
 
 float generateGeometric(int n)
 {
   float t = (float)n / FS;
   float ratio = F1 / F0;
-  float phase = 2.0 * PI * (F0 * DURATION / log(ratio)) * (pow(ratio, t / DURATION) - 1.0);
+
+  float phase =
+      2.0 * PI *
+      (F0 * DURATION / log(ratio)) *
+      (pow(ratio, t / DURATION) - 1.0);
+
   return sin(phase);
 }
+
+// ============================================================
+// SEND ONE WAVEFORM
+// ============================================================
 
 void sendWaveform(const char* name, char type)
 {
@@ -77,6 +120,11 @@ void sendWaveform(const char* name, char type)
   Serial.println("END_WAVEFORM");
 }
 
+// ============================================================
+// TARGET 0 - STATIONARY
+// LFM -> PCP
+// ============================================================
+
 void sendTarget0()
 {
   Serial.println("AQUASENSE_START");
@@ -89,6 +137,11 @@ void sendTarget0()
 
   Serial.println("AQUASENSE_END");
 }
+
+// ============================================================
+// TARGET 1 - NON-STATIONARY
+// HFM -> LFM -> PCP
+// ============================================================
 
 void sendTarget1()
 {
@@ -106,12 +159,20 @@ void sendTarget1()
   Serial.println("AQUASENSE_END");
 }
 
+// ============================================================
+// SETUP
+// ============================================================
+
 void setup()
 {
   Serial.begin(115200);
   delay(1000);
   Serial.println("AQUASENSE_READY");
 }
+
+// ============================================================
+// LOOP
+// ============================================================
 
 void loop()
 {
