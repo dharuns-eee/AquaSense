@@ -1,145 +1,116 @@
 # Waveform Selection
 
-Waveform selection is the central adaptive feature of AquaSense. The transmitter is not restricted to one predefined signal. Instead, the embedded decision layer can select among multiple software-defined waveform modes based on configured environmental and mission conditions.
-
-## Why Multiple Waveforms?
-
-Different underwater operating conditions can create different requirements for acoustic transmission. A single waveform may therefore not be the preferred choice for every scenario.
-
-AquaSense keeps waveform generation in software so that the transmitter hardware can support multiple modes without changing the main DAC, filter and amplifier path.
+Waveform selection is the central AquaSense concept: the transmitter can change its signal strategy through software rather than being locked to one fixed waveform.
 
 ## Waveform Modes
 
-| Waveform | Intended operating condition | Role |
-|---|---|---|
-| **LFM** | Stationary / clear and stable conditions | Baseline frequency-swept transmission |
-| **HFM** | Changing conditions / moving-target Doppler conditions | Alternative sweep designed for Doppler-related scenarios |
-| **Phase-Coded Pulses (PCP)** | High-turbidity conditions | Coded-pulse transmission option |
-| **Geometric Sweep** | Alternative software-defined sweep | Additional frequency-sweep mode |
+| Mode | Current role |
+|---|---|
+| **LFM** | Baseline frequency sweep; used in the stationary sequence and after HFM in the non-stationary sequence. |
+| **HFM** | Doppler-aware/resilient sweep option used at the start of the non-stationary target demonstration. |
+| **PCP** | Phase-coded pulse used as the final waveform in both demonstration sequences. |
+| **Geometric Sweep** | Additional non-linear sweep generator retained in the ESP32 firmware but not used in the final target sequences. |
 
-These operating-condition descriptions represent the current design intent. They are not presented as experimentally proven performance claims.
+## Final ESP32 Parameters
 
-## Input Factors
+- Sampling frequency: **1 MHz**
+- Duration: **1 ms**
+- Samples: **1000 per waveform**
+- Frequency band: **250–270 kHz**
+- PCP carrier: **260 kHz**
+- PCP code: `+ + + - - + - +`
 
-The decision layer can consider:
+## Final Target Sequences
 
-- Temperature
-- Salinity
-- Depth
-- Turbidity
-- Target motion / Doppler conditions
-
-Inputs can be normalized or converted into configured operating states before waveform selection.
-
-## Decision Approach
-
-A weighted decision model can score each candidate waveform:
-
-$$S_i=\sum_{j=1}^{n}w_jx_j$$
-
-where:
-
-- $S_i$ is the score of waveform $i$.
-- $x_j$ is an input factor.
-- $w_j$ is the configured weight of that factor.
-
-The selected waveform can then be represented as:
-
-$$W^*=\arg\max_{W_i}S_i$$
-
-This model provides a structured way to combine multiple conditions instead of basing the decision on a single input.
-
-## Rule-Based Prototype Logic
-
-For early embedded validation, deterministic rules can be used alongside or instead of a weighted model:
+### Target 0 — Stationary
 
 ```text
-Stable operating state
-        ↓
-      LFM
-
-High-turbidity state
-        ↓
-      PCP
-
-Changing temperature/depth state
-        ↓
-      HFM / configured sweep
-
-Dynamic target / Doppler state
-        ↓
-      Doppler-resilient waveform configuration
+LFM → PCP
 ```
 
-The exact threshold values and priority between competing conditions should be treated as configurable design parameters.
+### Target 1 — Non-Stationary
+
+```text
+HFM → LFM → PCP
+```
+
+These sequences are the locked final competition-demo behaviour.
+
+## Target-State Representation
+
+The current prototype does **not** contain a SONAR receiver. Therefore the target state is supplied to the ESP32 by the demo command rather than inferred from a measured acoustic echo.
+
+In the final demo:
+
+```text
+Python menu choice
+      ↓
+ESP32 command: 0 or 1
+      ↓
+Target sequence selected
+      ↓
+Waveforms generated
+      ↓
+Samples streamed over serial
+```
+
+A future receiver-enabled system could replace this software target-state input with a target-motion decision derived from received acoustic data.
+
+## Environmental Adaptation
+
+At the system level, AquaSense is designed around representative environmental inputs such as temperature, salinity, depth and turbidity. The MATLAB/Simulink model demonstrates these changing conditions and an adaptive decision architecture.
+
+The final ESP32 competition code intentionally does **not** use the physical pots/environmental inputs to drive the two live menu sequences. This keeps the final demonstration reliable and focuses it on the adaptive waveform-transmission concept.
+
+Any threshold, weight or mapping from environmental conditions to waveform choice should be treated as a configurable design rule until experimentally validated.
 
 ## Waveform Generation
 
-After a waveform is selected, the firmware must generate the corresponding sample sequence. The generation path can use:
+### LFM
 
-- Mathematical waveform generation.
-- Precomputed Look-Up Tables (LUTs).
-- Configured frequency and timing parameters.
-- Amplitude scaling.
-- Pulse-duration or sweep-duration parameters.
+The firmware implements a linear sweep using:
 
-The generated samples are then prepared for DAC transmission.
+$$f(t)=f_0+kt$$
 
-## Real-Time Execution
+with the final demonstration band set to 250–270 kHz.
 
-AquaSense uses hardware-assisted transmission so that waveform generation and sample delivery do not require continuous CPU intervention.
+### HFM
 
-```text
-Decision
-   ↓
-Waveform + Parameters
-   ↓
-LUT / Sample Buffer
-   ↓
-DMA
-   ↓
-Hardware Timer
-   ↓
-DAC
-```
+The firmware uses the hyperbolic phase formulation to generate the HFM sweep across the demonstration band. In competition language, it should be described as **Doppler-aware/resilient**, not as a waveform that removes Doppler effects.
 
-The hardware timer establishes the sample/update timing while DMA transfers samples to the DAC. This approach supports repeatable waveform timing and leaves the CPU available for other embedded tasks.
+### PCP
 
-## Switching Between Modes
-
-When the operating state changes, the firmware can load the corresponding waveform configuration and sample source. The transition strategy should ensure that waveform parameters are updated at an appropriate transmission boundary rather than producing an unintended partial waveform.
-
-A prototype mode switch can therefore follow:
+PCP uses a 260 kHz carrier multiplied by the 8-chip bipolar phase code:
 
 ```text
-Input condition changes
-        ↓
-Decision state updated
-        ↓
-New waveform selected
-        ↓
-New LUT / parameters loaded
-        ↓
-DMA transmission configured
-        ↓
-Selected waveform transmitted
++ + + - - + - +
 ```
 
-## Validation Plan
+### Geometric Sweep
 
-Waveform-selection validation should compare the configured input state with the selected output mode.
+The geometric generator uses an exponential frequency progression. It remains available in firmware for future waveform experiments but is not part of the two final target sequences.
 
-Recommended checks include:
+## System-Level Decision Model
 
-1. Apply a known input condition.
-2. Record the decision state.
-3. Record the selected waveform.
-4. Capture the generated waveform.
-5. Inspect its time-domain and frequency-domain characteristics.
-6. Repeat for other representative conditions.
+The broader adaptive architecture can be represented by:
 
-The results can later be stored in the `results/` directory once measurements are available.
+$$S_i=\sum_{j=1}^{n}w_jx_j$$
 
-## Current Status
+followed by:
 
-The waveform-selection document describes the design approach and intended operating modes. Exact thresholds, weights and performance comparisons should be added only after the corresponding prototype behaviour has been tested and validated.
+$$W^*=\arg\max_{W_i}S_i$$
+
+This is a **system-level design model**, not the logic executed by the final ESP32 menu demo.
+
+## Validation
+
+The final digital demonstration validates:
+
+- Waveform generation.
+- Target-sequence ordering.
+- Serial transmission protocol.
+- Time-domain visualization.
+- Hann-windowed FFT processing.
+- 0–500 kHz presentation display.
+
+Physical acoustic validation, receiver-based target detection and underwater performance remain future stages.
