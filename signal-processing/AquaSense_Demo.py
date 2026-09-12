@@ -4,13 +4,15 @@ import matplotlib.pyplot as plt
 import time
 
 # ============================================================
-# AQUASENSE - FINAL HACKATHON DEMONSTRATION
-# ============================================================
+# AQUASENSE - BASIC ESP32 PROTOTYPE DEMONSTRATION
+# This is the current digital demo, not the final hardware demo.
+# Planned final platform: STM32G4 + DAC + analog/power stages
+# with oscilloscope-based electrical waveform verification.
 # TARGET 0 - STATIONARY: LFM -> PCP
 # TARGET 1 - NON-STATIONARY: HFM -> LFM -> PCP
 # DISPLAY: Combined Time Domain -> Hann Window -> FFT
 # FFT DISPLAY: 0 - 500 kHz
-# NOTE: This is a demonstration visualization.
+# NOTE: This is a controlled demonstration visualization.
 # ============================================================
 
 PORT = "COM9"
@@ -22,7 +24,7 @@ DISPLAY_STEP = 5
 
 def connect_esp32():
     print()
-    print("Connecting to AquaSense on COM9...")
+    print("Connecting to AquaSense basic prototype on COM9...")
     ser = serial.Serial(PORT, BAUD, timeout=5)
     time.sleep(2)
     ser.reset_input_buffer()
@@ -233,7 +235,7 @@ def plot_combined_time(ax, waveforms):
         start = end
 
     ax.set_title(
-        "Combined Transmission — Time Domain",
+        "Basic Prototype Transmission — Time Domain",
         fontsize=16,
         fontweight="bold",
         loc="left",
@@ -286,7 +288,7 @@ def plot_combined_fft(ax, waveforms, target_name):
         display_frequency,
         display_magnitude,
         linewidth=1.4,
-        label="Combined Spectrum"
+        label="Controlled Demo Spectrum"
     )
 
     ax.set_xlim(0, 500)
@@ -301,7 +303,7 @@ def plot_combined_fft(ax, waveforms, target_name):
     )
 
     ax.set_title(
-        "Combined FFT — Hann Window",
+        "FFT Presentation — Hann Window",
         fontsize=16,
         fontweight="bold",
         loc="left",
@@ -337,7 +339,7 @@ def show_dashboard(target_name, waveforms):
     ax_fft = fig.add_subplot(grid[2])
 
     fig.suptitle(
-        "AquaSense Adaptive SONAR Demonstration\n"
+        "AquaSense Basic SONAR Prototype Demonstration\n"
         "Target: " + target_name,
         fontsize=20,
         fontweight="bold",
@@ -403,7 +405,7 @@ def show_dashboard(target_name, waveforms):
 def run_test(ser, command):
     print()
     print("==============================================")
-    print("       AQUASENSE TRANSMISSION STARTED")
+    print("       AQUASENSE BASIC PROTOTYPE STARTED")
     print("==============================================")
 
     target_name, waveforms = receive_target(
@@ -438,7 +440,7 @@ def main():
         while True:
             print()
             print("==============================================")
-            print("             AQUASENSE SONAR")
+            print("          AQUASENSE BASIC SONAR DEMO")
             print("==============================================")
             print()
             print("1. Target 0 - Stationary")
@@ -457,7 +459,7 @@ def main():
 
             elif choice == "3":
                 print()
-                print("AquaSense shutting down.")
+                print("AquaSense basic prototype shutting down.")
                 break
 
             else:
