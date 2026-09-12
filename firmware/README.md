@@ -1,10 +1,10 @@
 # Firmware
 
-The `firmware/` directory contains the embedded demonstration firmware for the AquaSense SONAR transmitter payload.
+The `firmware/` directory contains the embedded software for the AquaSense SONAR transmitter concept.
 
-## Current Demonstration Firmware
+## Current Basic Demonstration Firmware
 
-`AquaSense_ESP32.ino` is the current ESP32 demonstration transmitter. It streams selected waveform samples over serial to the Python visualization program.
+`AquaSense_ESP32.ino` is the current **basic ESP32 prototype**. It streams selected waveform samples over serial to the Python visualization program.
 
 ### Demonstration parameters
 
@@ -13,9 +13,9 @@ The `firmware/` directory contains the embedded demonstration firmware for the A
 - PCP carrier: **260 kHz**
 - Samples per waveform: **1000**
 - Serial baud rate: **115200**
-- Serial port used by the demo: **COM9**
+- Serial port used by the basic demo: **COM9**
 
-### Target sequences
+### Current target sequences
 
 ```text
 Target 0 — Stationary
@@ -30,7 +30,7 @@ HFM → LFM → PCP
 - **LFM:** linear frequency sweep from 250 kHz to 270 kHz.
 - **HFM:** hyperbolic frequency sweep across the demonstration band.
 - **PCP:** 260 kHz carrier with the 8-chip phase code `+ + + - - + - +`.
-- **Geometric sweep:** retained in the firmware as an additional software-defined waveform generator, but not used in the two final demo sequences.
+- **Geometric sweep:** retained in the firmware as an additional software-defined waveform generator.
 
 ## Serial Protocol
 
@@ -54,7 +54,7 @@ Python sends a single character command:
 1 → Target 1 / Non-Stationary
 ```
 
-## Run with Python Demo
+## Run the Basic Python Demo
 
 Use the companion program:
 
@@ -64,6 +64,10 @@ python signal-processing/AquaSense_Demo.py
 
 Make sure the Arduino Serial Monitor is closed while the Python program is using **COM9**.
 
-## Prototype Note
+## Prototype Boundary
 
-This firmware is part of a **demonstration prototype**. The 250–270 kHz configuration is used to make the frequency-domain demonstration clear. It should not be presented as a measured underwater acoustic transmission result. Physical DAC, amplifier, transducer and underwater validation are separate hardware stages.
+This firmware is part of the **current basic digital prototype**. The 250–270 kHz configuration is used to make the software frequency-domain demonstration clear. It should not be presented as a measured underwater acoustic transmission result.
+
+## Planned Final Firmware Platform
+
+The final hardware prototype will move the waveform-generation and adaptive control functions to an **STM32G4** and connect them to the intended high-speed DAC, filtering, MOSFET/power and amplifier stages. The final physical demonstration will use an **oscilloscope** to verify the electrical waveform.
