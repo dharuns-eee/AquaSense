@@ -24,10 +24,6 @@ The non-stationary-target basic demonstration uses the sequence:
 
 The figure shows the generated HFM and LFM waveforms, Hann-windowed FFT results, PCP phase-code waveform, PCP FFT, and the combined transmission views.
 
-### 3. Basic Prototype Video
-
-`AquaSense_Final_Demo.mp4` is the **current basic ESP32/Python demonstration recording**. The filename is retained for compatibility with the uploaded repository artifact, but the video itself must be described as a basic prototype demo, not the final hardware demo.
-
 ## Prototype Configuration
 
 | Parameter | Current basic prototype |
