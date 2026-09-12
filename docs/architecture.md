@@ -1,6 +1,6 @@
 # AquaSense Architecture
 
-AquaSense is a **real-time, software-defined SONAR transmitter payload** intended for integration into an Autonomous Underwater Vehicle (AUV). The project separates the full system architecture from the current competition prototype so that the repository clearly distinguishes design intent from what is currently demonstrated.
+AquaSense is a **real-time, software-defined SONAR transmitter payload** intended for integration into an Autonomous Underwater Vehicle (AUV). The project separates the full system architecture from the **current basic ESP32 prototype** and the **planned final STM32G4 hardware demonstration**.
 
 > **AquaSense is a SONAR payload/subsystem, not a complete AUV.**
 
@@ -36,7 +36,7 @@ The system-level design considers:
 - Turbidity
 - Target motion / Doppler conditions
 
-The environmental profiles shown in the MATLAB/Simulink material are **representative system-level inputs**. They demonstrate how changing underwater conditions can feed an adaptive architecture; they are not claimed as measured sensor data from the final ESP32 demonstration.
+The environmental profiles shown in the MATLAB/Simulink material are **representative system-level inputs**. They demonstrate how changing underwater conditions can feed an adaptive architecture; they are not claimed as measured sensor data from the current ESP32 prototype.
 
 ## Adaptive Decision Layer
 
@@ -58,12 +58,12 @@ AquaSense supports four software-defined waveform generators:
 |---|---|
 | **LFM** | Linear Frequency Modulation; frequency increases linearly across the configured band. |
 | **HFM** | Hyperbolic Frequency Modulation; used as the Doppler-aware/resilient sweep option in the moving-target demonstration. |
-| **PCP** | Phase-Coded Pulse; 260 kHz carrier with an 8-chip code `+ + + - - + - +` in the final ESP32 demo. |
+| **PCP** | Phase-Coded Pulse; 260 kHz carrier with an 8-chip code `+ + + - - + - +` in the current ESP32 prototype. |
 | **Geometric Sweep** | Non-linear frequency sweep retained as an additional software-defined generator. |
 
-## Final ESP32 Demonstration
+## Current Basic ESP32 Demonstration
 
-The final competition prototype uses an **ESP32** as the waveform-generation and serial-streaming controller.
+The current basic digital prototype uses an **ESP32** as the waveform-generation and serial-streaming controller.
 
 ### Fixed demonstration parameters
 
@@ -86,11 +86,11 @@ LFM → PCP
 HFM → LFM → PCP
 ```
 
-The target state in this prototype is **software-commanded/simulated**. There is no physical SONAR receiver in the final demo, so the ESP32 does not infer target motion from a measured echo. In a complete SONAR implementation, target motion would be inferred from received acoustic data and Doppler-related changes.
+The target state in this basic prototype is **software-commanded/simulated**. There is no physical SONAR receiver, so the ESP32 does not infer target motion from a measured echo.
 
-## Digital Waveform Path
+## Digital Prototype Path
 
-The final ESP32 firmware generates floating-point samples mathematically and streams them over USB serial to the Python demonstration.
+The current ESP32 firmware generates floating-point samples mathematically and streams them over USB serial to the Python demonstration.
 
 ```text
 Python command
@@ -104,39 +104,37 @@ USB Serial @ 115200
 Python receiver
       ↓
 Time-domain display
+      ↓
+Hann Window → FFT
 ```
 
-The final firmware also contains the geometric-sweep generator, although the two final target sequences do not use it.
+The geometric-sweep generator is also retained in firmware for future waveform experiments.
 
-## System-Level Hardware Architecture
+## Planned Final STM32G4 Hardware Demonstration
 
-The broader transmitter design remains:
+The final hardware demonstration will use an **STM32G4** and a physical transmitter chain. An **oscilloscope** will be used to verify the electrical waveform.
 
 ```text
-STM32G4 / Embedded Controller
+STM32G4
           ↓
-      ADC / Inputs
-          ↓
- Adaptive Decision Logic
-          ↓
- Waveform LUT / Generation
-          ↓
-        High-Speed DAC
+      High-Speed DAC
           ↓
      Low-Pass Filter
           ↓
- Class-D + MOSFET Stage
+ MOSFET Switching / Power Stage
           ↓
- SONAR Acoustic Transducer
+       Amplifier
           ↓
- Oscilloscope / Analysis
+ SONAR Transducer / Test Load
+          ↓
+      Oscilloscope
 ```
 
-This is the **intended full payload architecture**. The final ESP32 demo is a reduced software/serial prototype used to demonstrate waveform generation, target-state sequencing and signal visualization.
+This is the intended final physical demonstration direction. The current ESP32/Python prototype does not contain these physical transmitter stages.
 
 ## Signal Processing
 
-The Python demonstration applies a Hann window before the computational FFT:
+The current Python demonstration applies a Hann window before the computational FFT:
 
 $$w[n]=0.5\left(1-\cos\frac{2\pi n}{N-1}\right)$$
 
@@ -168,10 +166,11 @@ The repository distinguishes three levels:
 
 1. **System architecture** — environmental sensing, adaptive decision logic, waveform selection, DAC/analog chain and acoustic output.
 2. **MATLAB/Simulink system model** — representative environmental inputs, adaptive parameters, waveform scheduling and signal-path simulation.
-3. **Final competition prototype** — ESP32 waveform generation + serial streaming + Python Hann/FFT visualization with software-simulated target states.
+3. **Current basic prototype** — ESP32 waveform generation + serial streaming + Python Hann/FFT visualization with software-simulated target states.
+4. **Planned final hardware demonstration** — STM32G4-based physical transmitter chain with oscilloscope verification.
 
-Keeping these boundaries explicit prevents the prototype from being presented as a completed underwater SONAR receiver/transmitter system.
+Keeping these boundaries explicit prevents the current prototype from being presented as the completed physical SONAR system.
 
 ## Validation Status
 
-The current prototype demonstrates the digital transmission sequence and signal-processing visualization. Physical transducer output, receiver-based target detection, quantitative power measurements and controlled underwater validation remain separate future validation stages.
+The current prototype demonstrates digital waveform generation, transmission sequencing and signal-processing visualization. STM32G4 hardware integration, physical DAC/analog/power-stage measurements, oscilloscope verification, receiver-based target detection and controlled underwater validation remain future stages.
