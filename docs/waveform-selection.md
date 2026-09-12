@@ -8,10 +8,10 @@ Waveform selection is the central AquaSense concept: the transmitter can change 
 |---|---|
 | **LFM** | Baseline frequency sweep; used in the stationary sequence and after HFM in the non-stationary sequence. |
 | **HFM** | Doppler-aware/resilient sweep option used at the start of the non-stationary target demonstration. |
-| **PCP** | Phase-coded pulse used as the final waveform in both demonstration sequences. |
-| **Geometric Sweep** | Additional non-linear sweep generator retained in the ESP32 firmware but not used in the final target sequences. |
+| **PCP** | Phase-coded pulse used as the final waveform in both current basic demonstration sequences. |
+| **Geometric Sweep** | Additional non-linear sweep generator retained in the ESP32 firmware for future experiments. |
 
-## Final ESP32 Parameters
+## Current Basic ESP32 Parameters
 
 - Sampling frequency: **1 MHz**
 - Duration: **1 ms**
@@ -20,7 +20,7 @@ Waveform selection is the central AquaSense concept: the transmitter can change 
 - PCP carrier: **260 kHz**
 - PCP code: `+ + + - - + - +`
 
-## Final Target Sequences
+## Current Basic Target Sequences
 
 ### Target 0 — Stationary
 
@@ -34,13 +34,13 @@ LFM → PCP
 HFM → LFM → PCP
 ```
 
-These sequences are the locked final competition-demo behaviour.
+These sequences are the current **basic digital prototype demonstration behaviour**.
 
 ## Target-State Representation
 
 The current prototype does **not** contain a SONAR receiver. Therefore the target state is supplied to the ESP32 by the demo command rather than inferred from a measured acoustic echo.
 
-In the final demo:
+In the current basic demo:
 
 ```text
 Python menu choice
@@ -60,7 +60,7 @@ A future receiver-enabled system could replace this software target-state input 
 
 At the system level, AquaSense is designed around representative environmental inputs such as temperature, salinity, depth and turbidity. The MATLAB/Simulink model demonstrates these changing conditions and an adaptive decision architecture.
 
-The final ESP32 competition code intentionally does **not** use the physical pots/environmental inputs to drive the two live menu sequences. This keeps the final demonstration reliable and focuses it on the adaptive waveform-transmission concept.
+The current ESP32 basic demonstration intentionally does **not** use the physical pots/environmental inputs to drive the two live menu sequences.
 
 Any threshold, weight or mapping from environmental conditions to waveform choice should be treated as a configurable design rule until experimentally validated.
 
@@ -72,7 +72,7 @@ The firmware implements a linear sweep using:
 
 $$f(t)=f_0+kt$$
 
-with the final demonstration band set to 250–270 kHz.
+with the basic demonstration band set to 250–270 kHz.
 
 ### HFM
 
@@ -88,7 +88,7 @@ PCP uses a 260 kHz carrier multiplied by the 8-chip bipolar phase code:
 
 ### Geometric Sweep
 
-The geometric generator uses an exponential frequency progression. It remains available in firmware for future waveform experiments but is not part of the two final target sequences.
+The geometric generator uses an exponential frequency progression. It remains available in firmware for future waveform experiments.
 
 ## System-Level Decision Model
 
@@ -100,11 +100,11 @@ followed by:
 
 $$W^*=\arg\max_{W_i}S_i$$
 
-This is a **system-level design model**, not the logic executed by the final ESP32 menu demo.
+This is a **system-level design model**, not the logic executed by the current ESP32 basic menu demo.
 
-## Validation
+## Validation Levels
 
-The final digital demonstration validates:
+The current basic digital demonstration validates:
 
 - Waveform generation.
 - Target-sequence ordering.
@@ -112,5 +112,7 @@ The final digital demonstration validates:
 - Time-domain visualization.
 - Hann-windowed FFT processing.
 - 0–500 kHz presentation display.
+
+The **final hardware demonstration** is planned around an STM32G4, high-speed DAC, analog/power stages and oscilloscope-based electrical verification.
 
 Physical acoustic validation, receiver-based target detection and underwater performance remain future stages.
