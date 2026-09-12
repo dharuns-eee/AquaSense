@@ -1,18 +1,44 @@
-# Final AquaSense Prototype Specification
+# AquaSense Basic Prototype Demo Specification
 
-This document is the concise reference for the locked competition demonstration.
+This document describes the **current basic digital prototype demonstration**. It must not be presented as the final hardware demonstration.
 
-## Hardware
+## Current Basic Prototype Hardware
 
 - ESP32 development board
 - USB connection to laptop
-- Current demo uses the ESP32 as a digital waveform generator and serial transmitter.
+- Python host program for serial reception and visualization
 
-## Firmware
+The current ESP32 implementation is a reduced software/serial prototype used to demonstrate waveform generation, adaptive target-state sequencing and signal-processing visualization.
+
+## Planned Final Hardware Demonstration
+
+The **final AquaSense hardware demonstration will be implemented using an STM32G4 and a physical transmitter chain**, with an oscilloscope used to verify the electrical waveform.
+
+The intended final chain is:
+
+```text
+STM32G4
+   ↓
+High-Speed DAC
+   ↓
+Low-Pass Filter
+   ↓
+MOSFET Switching / Power Stage
+   ↓
+Amplifier
+   ↓
+SONAR Transducer / Test Load
+   ↓
+Oscilloscope
+```
+
+The STM32G4-based stage is the planned final hardware direction. The current ESP32/Python demonstration does not contain this physical chain.
+
+## Current Prototype Firmware
 
 `firmware/AquaSense_ESP32.ino`
 
-| Parameter | Final value |
+| Parameter | Current basic prototype |
 |---|---:|
 | Sampling frequency | 1 MHz |
 | Duration | 1 ms |
@@ -28,7 +54,7 @@ This document is the concise reference for the locked competition demonstration.
 - LFM: 250 → 270 kHz linear sweep.
 - HFM: 250 → 270 kHz hyperbolic sweep.
 - PCP: 260 kHz carrier with 8-chip phase code.
-- Geometric sweep: retained but not used in final target sequences.
+- Geometric sweep: retained as an additional software-defined generator.
 
 ### Target commands
 
@@ -36,7 +62,7 @@ This document is the concise reference for the locked competition demonstration.
 
 `1` selects the non-stationary sequence.
 
-## Final Sequences
+## Basic Prototype Sequences
 
 ### Target 0 — Stationary
 
@@ -46,7 +72,7 @@ This document is the concise reference for the locked competition demonstration.
 
 **HFM → LFM → PCP**
 
-The target state is software-simulated in this prototype because no physical SONAR receiver is connected.
+The target state is software-simulated in the current prototype because no physical SONAR receiver is connected.
 
 ## Python Analysis
 
@@ -66,44 +92,46 @@ The PCP is shown as its 8-chip phase-code structure in the time-domain presentat
 
 ## FFT Presentation Note
 
-The Python script calculates an actual Hann-windowed FFT from the received samples. For the competition dashboard, a controlled presentation spectrum is then generated so that spectral activity is visible across the requested 0–500 kHz display and around the 250–270 kHz demonstration band.
+The Python script calculates an actual Hann-windowed FFT from the received samples. For the dashboard, a controlled presentation spectrum is then generated so that spectral activity is visible across the requested 0–500 kHz display and around the 250–270 kHz demonstration band.
 
-Therefore, the final plotted 0–500 kHz presentation spectrum is **not a measured underwater acoustic spectrum**.
+Therefore, the plotted 0–500 kHz presentation spectrum is **not a measured underwater acoustic spectrum**.
 
 ## System-Level Context
 
 The broader AquaSense architecture remains:
 
 ```text
-Environmental Inputs
+Environmental Inputs + Target Information
        ↓
 Adaptive Decision Logic
        ↓
 Waveform Selection
        ↓
-Waveform Generation
+STM32G4
        ↓
-DAC
+High-Speed DAC
        ↓
 Low-Pass Filter
        ↓
-Amplifier / MOSFET Stage
+MOSFET / Amplifier Stage
        ↓
 SONAR Transducer
        ↓
-Receiver / Oscilloscope / FFT
+Oscilloscope / Receiver / FFT
 ```
 
-The MATLAB/Simulink material represents this broader system concept. The final ESP32/Python implementation is the reduced competition prototype.
+The MATLAB/Simulink material represents this broader system concept. The ESP32/Python implementation is only the **current basic prototype**.
 
 ## Environmental Inputs
 
-Temperature, salinity, depth and turbidity remain part of the **system-level adaptive concept**. The final ESP32 menu demonstration does not depend on the physical pots, so the demo remains reliable even when those inputs are not available.
+Temperature, salinity, depth and turbidity remain part of the **system-level adaptive concept**. The current ESP32 menu demonstration does not depend on physical potentiometer inputs.
 
 ## Technical Honesty
 
-The prototype should be presented as:
+The current prototype should be presented as:
 
-> **A software-defined adaptive SONAR transmission demonstration with embedded waveform generation, target-state sequencing and Hann-windowed FFT visualization.**
+> **A basic software-defined adaptive SONAR transmission demonstration with embedded waveform generation, target-state sequencing and Hann-windowed FFT visualization.**
+
+The **final hardware demonstration** is planned around the STM32G4 transmitter chain and oscilloscope-based electrical verification.
 
 Do not claim physical echo-based target detection, measured underwater acoustic performance or measured power savings unless those stages are subsequently validated.
