@@ -1,8 +1,8 @@
 # Signal Processing
 
-The final AquaSense signal-processing path receives waveform samples from the ESP32 and provides a clear time-domain and frequency-domain demonstration.
+The current AquaSense signal-processing path receives waveform samples from the **ESP32 basic prototype** and provides a clear time-domain and frequency-domain demonstration.
 
-## Final Workflow
+## Current Basic Prototype Workflow
 
 ```text
 ESP32 waveform samples
@@ -20,7 +20,7 @@ Magnitude spectrum
 0–500 kHz presentation
 ```
 
-## Final Python Program
+## Current Python Program
 
 `AquaSense_Demo.py` uses:
 
@@ -42,7 +42,7 @@ python signal-processing/AquaSense_Demo.py
 
 ## Serial Interface
 
-The current demo configuration is:
+The current basic demo configuration is:
 
 ```text
 Port: COM9
@@ -76,7 +76,7 @@ rFFT
 
 The implementation uses NumPy's `np.hanning()` and `np.fft.rfft()` functions.
 
-## Final Dashboard
+## Basic Prototype Dashboard
 
 The dashboard shows:
 
@@ -92,11 +92,11 @@ The time-domain plot reduces displayed chirp samples for visual readability, whi
 
 ## Demonstration Spectrum
 
-The Python program calculates the actual Hann-windowed FFT magnitude from the received samples. It then creates a **controlled presentation spectrum** for the competition dashboard so that the requested 0–500 kHz range has visible spectral structure and a clear 250–270 kHz demonstration region.
+The Python program calculates the actual Hann-windowed FFT magnitude from the received samples. It then creates a **controlled presentation spectrum** for the basic prototype dashboard so that the requested 0–500 kHz range has visible spectral structure and a clear 250–270 kHz demonstration region.
 
 This presentation spectrum is **not a measured underwater acoustic spectrum** and should not be reported as one.
 
-## Target Sequences
+## Current Target Sequences
 
 ```text
 Target 0 — Stationary
@@ -109,3 +109,7 @@ HFM → LFM → PCP
 ## Analysis Scope
 
 The current program demonstrates digital waveform generation, serial acquisition, sequence validation and frequency-domain visualization. Physical receiver processing, echo-based target detection, underwater acoustic measurement and measured transducer spectra are future validation stages.
+
+## Planned Final Hardware Measurement
+
+The final physical demonstration will use the **STM32G4-based transmitter chain**, with an oscilloscope used to verify the electrical waveform after the appropriate DAC, filtering and power/amplifier stages.
