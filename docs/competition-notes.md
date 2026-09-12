@@ -45,13 +45,13 @@ The MATLAB/Simulink figures demonstrate these changing inputs and the system-lev
 AquaSense includes:
 
 - **LFM** — Linear Frequency Modulation.
-- **HFM** — Hyperbolic Frequency Modulation; used as the Doppler-aware/resilient option in the moving-target demo.
+- **HFM** — Hyperbolic Frequency Modulation; used as the Doppler-aware/resilient option in the moving-target demonstration.
 - **PCP** — Phase-Coded Pulses.
 - **Geometric Sweep** — additional software-defined sweep mode.
 
-## Final Competition Demonstration
+## Current Basic Competition Demonstration
 
-The final embedded demonstration uses an **ESP32** with a 1 MHz sampling configuration and a 250–270 kHz demonstration band.
+The current embedded demonstration is a **basic ESP32 + Python digital prototype**, using a 1 MHz sampling configuration and a 250–270 kHz demonstration band.
 
 ```text
 Target 0 — Stationary
@@ -74,30 +74,53 @@ The strongest competition points are:
 3. **Target-state adaptation:** stationary and non-stationary cases use different sequences.
 4. **Embedded + PC workflow:** ESP32 generation is connected to Python analysis through a simple serial protocol.
 5. **Signal-processing verification:** the Python side explicitly demonstrates Hann-window processing followed by FFT.
-6. **System-level scalability:** the same concept can progress toward DAC, filtering, amplification, transducer and receiver hardware.
+6. **System-level scalability:** the concept can progress toward STM32G4, DAC, filtering, amplification, transducer and oscilloscope-verified physical hardware.
 
 ## What Not to Claim
 
 For technical accuracy:
 
 - Do not claim that the current ESP32 prototype performs physical SONAR target detection.
-- Do not claim that the pots/environmental sensors are driving the final ESP32 menu demo.
+- Do not claim that the pots/environmental sensors are driving the current ESP32 menu demo.
 - Do not call the 250–270 kHz Python presentation spectrum a measured underwater spectrum.
 - Do not claim HFM eliminates Doppler; describe it as a Doppler-aware/resilient waveform option.
 - Do not claim quantitative low-power improvement without measurement.
+- Do not present the current ESP32/Python demonstration as the final hardware prototype.
 
-## Presentation Sequence
+## Planned Final Hardware Demonstration
 
-A clean live demonstration is:
+The final AquaSense demonstration will use an **STM32G4-based physical transmitter** and an **oscilloscope** for electrical waveform verification.
 
-1. Show the ESP32/prototype hardware.
+```text
+STM32G4
+      ↓
+High-Speed DAC
+      ↓
+Low-Pass Filter
+      ↓
+MOSFET Switching / Power Stage
+      ↓
+Amplifier
+      ↓
+SONAR Transducer / Test Load
+      ↓
+Oscilloscope
+```
+
+The final hardware stage will provide physical waveform evidence that is separate from the current ESP32/Python digital demonstration.
+
+## Basic Prototype Presentation Sequence
+
+A clean live basic demonstration is:
+
+1. Show the ESP32/basic prototype hardware.
 2. Connect the ESP32 to the laptop.
 3. Run `AquaSense_Demo.py`.
 4. Select **1. Target 0 — Stationary** and show `LFM → PCP`.
 5. Show the combined waveform and `Hann Window → FFT` dashboard.
 6. Select **2. Target 1 — Non-Stationary** and show `HFM → LFM → PCP`.
-7. Explain that the target state is currently software-simulated and that the receiver/transducer stage is future work.
+7. Explain that this is the basic digital prototype and that the final demonstration will use STM32G4 hardware and oscilloscope verification.
 
 ## Scope Boundary
 
-The full system architecture may include ADC/environmental inputs, adaptive decision logic, waveform scheduling, DAC, low-pass filtering, amplifier/MOSFET stage, transducer, receiver and analysis. The final competition prototype demonstrates the digital waveform-generation, sequencing and visualization portion of that architecture.
+The full system architecture may include ADC/environmental inputs, adaptive decision logic, waveform scheduling, DAC, low-pass filtering, amplifier/MOSFET stage, transducer, receiver and analysis. The current basic competition prototype demonstrates the digital waveform-generation, sequencing and visualization portion of that architecture.
