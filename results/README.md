@@ -24,12 +24,6 @@ The non-stationary-target demonstration uses the sequence:
 
 The figure shows the generated HFM and LFM waveforms, Hann-windowed FFT results, PCP phase-code waveform, PCP FFT, and the combined transmission views.
 
-### 3. Final Screen-Recorded Demonstration
-
-The final screen recording demonstrates the AquaSense software workflow, including the ESP32 serial interface, target selection, waveform sequence, and Python visualization.
-
-**Video:** `AquaSense_Final_Demo.mp4`
-
 ## Prototype Configuration
 
 | Parameter | Current prototype |
