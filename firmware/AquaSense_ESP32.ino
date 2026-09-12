@@ -2,7 +2,10 @@
 #include <math.h>
 
 // ============================================================
-// AQUASENSE - FINAL DEMONSTRATION TRANSMISSION GENERATOR
+// AQUASENSE - BASIC ESP32 PROTOTYPE TRANSMISSION GENERATOR
+// This firmware is the current digital demonstration only.
+// Planned final hardware platform: STM32G4 + DAC + analog/power
+// stages, with oscilloscope verification.
 // ============================================================
 
 const float FS = 1000000.0;      // 1 MHz sampling
