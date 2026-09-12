@@ -1,10 +1,10 @@
-# Testing Plan
+# AquaSense Testing and Validation Plan
 
-AquaSense uses staged validation so that the final competition demonstration can be separated from future physical SONAR validation.
+AquaSense uses staged validation so that the **current basic digital prototype demonstration** is clearly separated from the **planned final STM32G4 hardware demonstration and physical validation**.
 
-## 1. Final Digital Demonstration — Completed Target
+## 1. Current Basic Digital Prototype — Completed
 
-The current prototype verifies the embedded waveform-generation and serial path.
+The current ESP32 + Python prototype verifies the embedded waveform-generation, serial communication and digital signal-processing path.
 
 ### Checks
 
@@ -17,6 +17,8 @@ The current prototype verifies the embedded waveform-generation and serial path.
 - Python applies a Hann window before its FFT calculation.
 - Dashboard displays the combined time-domain sequence.
 - Dashboard provides the 0–500 kHz presentation axis.
+
+These checks validate the **basic software prototype**, not the final physical SONAR transmitter.
 
 ## 2. Waveform Checks
 
@@ -38,11 +40,11 @@ Verify the 260 kHz carrier and the 8-chip code:
 
 ### Geometric Sweep
 
-Verify the mathematical generator separately when required. It is retained in firmware but is not part of the two final target sequences.
+Verify the mathematical generator separately when required. It is retained in firmware as an additional waveform option.
 
 ## 3. Python Signal Processing
 
-The Python analysis performs:
+The current Python analysis performs:
 
 ```text
 Received signal
@@ -56,7 +58,7 @@ Magnitude
 Frequency-domain presentation
 ```
 
-The dashboard is intended for clear competition demonstration. Its controlled 0–500 kHz presentation spectrum must not be interpreted as a measured underwater acoustic spectrum.
+The dashboard is intended for clear basic-prototype demonstration. Its controlled 0–500 kHz presentation spectrum must not be interpreted as a measured underwater acoustic spectrum.
 
 ## 4. Target-State Demonstration
 
@@ -82,7 +84,7 @@ A future receiver-enabled implementation can replace the command with target-mot
 
 Temperature, salinity, depth and turbidity are part of the broader AquaSense architecture and MATLAB/Simulink model. Their thresholds/weights are design parameters until experimentally validated.
 
-The physical pots/environmental inputs are **not required for the final ESP32 competition demo**.
+The physical pots/environmental inputs are **not required for the current ESP32 basic demo**.
 
 Future testing should verify:
 
@@ -92,31 +94,53 @@ Future testing should verify:
 - Waveform selection under known conditions.
 - Repeatability across input changes.
 
-## 6. Physical Hardware Validation — Future
+## 6. Final STM32G4 Hardware Demonstration — Planned
 
-The intended physical transmitter chain remains:
+The final hardware demonstration will replace the ESP32 digital prototype with an **STM32G4-based transmitter chain**.
 
 ```text
-Embedded Controller
+STM32G4
       ↓
-DAC
+High-Speed DAC
       ↓
 Low-Pass Filter
       ↓
-Amplifier / MOSFET Stage
+MOSFET Switching / Power Stage
       ↓
-Transducer
+Amplifier
       ↓
-Oscilloscope / Receiver
+SONAR Transducer / Test Load
+      ↓
+Oscilloscope
 ```
 
-Future tests should measure the electrical output at each appropriate stage before making acoustic-performance claims.
+The oscilloscope will be used to verify the physical electrical waveform at appropriate points in the transmitter chain.
 
-## 7. Power Evaluation — Future
+Planned checks include:
 
-Low power is a supporting design objective. Actual measurements should use suitable instrumentation and report the test conditions.
+- STM32G4 peripheral configuration.
+- Deterministic waveform generation.
+- DAC output waveform.
+- Filtered waveform.
+- MOSFET/power-stage operation.
+- Amplifier output.
+- Transducer/test-load interface.
+- Oscilloscope waveform measurements.
+- Measured frequency characteristics.
+- Timing and repeatability.
+- Power measurements where instrumentation is available.
 
-Do not claim a quantitative power saving from the current software demonstration alone.
+## 7. Receiver and Target-Motion Validation — Planned
+
+A receiver-enabled system should eventually evaluate:
+
+- Echo acquisition.
+- Real target observation.
+- Target-motion estimation.
+- Doppler-related behaviour.
+- Adaptive waveform selection based on measured acoustic information.
+
+The current ESP32 prototype does not perform these functions.
 
 ## 8. Underwater Validation — Future
 
@@ -136,12 +160,12 @@ AquaSense distinguishes:
 
 - **Design** — intended architecture and decision strategy.
 - **Simulation/model** — MATLAB/Simulink behaviour using representative inputs.
-- **Digital prototype** — ESP32 waveform generation and Python analysis.
-- **Physical measurement** — oscilloscope/DAC/amplifier/transducer observations.
+- **Basic digital prototype** — ESP32 waveform generation and Python analysis.
+- **Final physical prototype / measurement** — STM32G4, DAC, analog/power chain and oscilloscope observations.
 - **Underwater validation** — controlled acoustic tests.
 
 Only the evidence appropriate to each category should be claimed.
 
 ## Current Status
 
-The final digital demonstration is the active competition prototype. Physical receiver/transducer validation, measured power data and controlled underwater testing remain future validation stages.
+The **ESP32 + Python basic digital prototype is completed for demonstration purposes**. The **final hardware demonstration is planned around the STM32G4 and oscilloscope-verified physical transmitter chain**. Receiver-based target detection, measured underwater performance and controlled underwater testing remain future validation stages.
