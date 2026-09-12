@@ -133,8 +133,7 @@ AquaSense/
 └── results/
     ├── README.md
     ├── Figure_1.png
-    ├── Figure_2.png
-    └── AquaSense_Final_Demo.mp4
+    └── Figure_2.png
 ```
 
 ## Evidence and Technical Scope
