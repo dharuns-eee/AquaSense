@@ -1,46 +1,50 @@
 # Hardware
 
-AquaSense is a **SONAR transmitter payload/subsystem for an AUV**. The repository distinguishes the broader intended transmitter hardware from the current ESP32 competition prototype.
+AquaSense is a **SONAR transmitter payload/subsystem for an AUV**. The repository distinguishes the broader intended transmitter hardware from the **current basic ESP32/Python prototype** and the **planned final STM32G4 hardware demonstration**.
 
-## Current Competition Prototype
+## Current Basic Prototype
 
-The final live demonstration uses:
+The current basic demonstration uses:
 
 - ESP32 development board
 - USB connection to a laptop
 - Python host application for serial reception and visualization
 
-The ESP32 prototype is a **digital waveform-generation and serial-streaming demonstration**. It does not currently include a SONAR receiver or a complete acoustic transmit chain.
+The ESP32 prototype is a **digital waveform-generation and serial-streaming demonstration**. It does not currently include a SONAR receiver or the complete physical acoustic transmit chain.
 
-## Broader Intended Hardware Chain
+## Planned Final Hardware Demonstration
+
+The final physical demonstration will use an **STM32G4** with a high-speed DAC and analog/power stages. An **oscilloscope** will be used to verify the electrical waveform.
 
 ```text
 Environmental / Mission Inputs
           ↓
-   Embedded Controller
+        STM32G4
           ↓
       High-Speed DAC
           ↓
      Low-Pass Filter
           ↓
- Class-D Amplifier / MOSFET Stage
+ MOSFET Switching / Power Stage
           ↓
- SONAR Acoustic Transducer
+       Amplifier
           ↓
- Receiver / Oscilloscope
+ SONAR Transducer / Test Load
+          ↓
+      Oscilloscope
 ```
 
-The system-level architecture and MATLAB/Simulink model use the STM32G4/SAR-ADC/DAC-oriented transmitter concept. That architecture is the planned full payload direction, not a claim that every block is present in the final ESP32 demonstration.
+The STM32G4 chain above is the planned final hardware direction, not a description of the current ESP32 basic demo.
 
 ## System-Level Components
 
 ### Embedded controller
 
-The broader design uses an MCU to coordinate input acquisition, adaptive decisions, waveform generation and deterministic sample delivery.
+The final hardware design uses an STM32G4 to coordinate input acquisition, adaptive decisions, waveform generation and deterministic sample delivery.
 
 ### Environmental input interface
 
-Temperature, salinity, depth and turbidity are representative inputs to the system-level adaptive architecture. They are not required for the final ESP32 menu demonstration.
+Temperature, salinity, depth and turbidity are representative inputs to the system-level adaptive architecture. They are not required for the current ESP32 basic menu demonstration.
 
 ### DAC
 
@@ -52,15 +56,15 @@ The filter conditions the reconstructed analog waveform and suppresses unwanted 
 
 ### Amplifier / MOSFET Stage
 
-The amplifier and switching stage provide the drive path toward the acoustic transducer.
+The amplifier and switching stage provide the drive path toward the acoustic transducer or test load.
 
 ### SONAR Transducer and Receiver
 
-These blocks form the future physical acoustic interface. A receiver would provide the echo information needed for real target observation and motion/Doppler analysis.
+These blocks form the physical acoustic interface planned for later validation. A receiver would provide the echo information needed for real target observation and motion/Doppler analysis.
 
 ### Oscilloscope
 
-An oscilloscope can be used to inspect the physical electrical waveform at appropriate points in the transmitter chain.
+An oscilloscope will be used in the final hardware demonstration to inspect and verify the physical electrical waveform at appropriate points in the transmitter chain.
 
 ## Hardware-to-Software Relationship
 
@@ -71,28 +75,32 @@ Adaptive decision
       ↓
 Waveform selection
       ↓
-Digital waveform generation
+STM32G4 waveform generation
       ↓
 DAC / analog chain
       ↓
-Acoustic output
+Acoustic output / test load
+      ↓
+Oscilloscope verification
 ```
 
-For the current competition prototype, the last physical transmission stages are represented by the digital/serial demonstration and Python visualization.
+For the current basic prototype, the physical transmission stages are represented by the ESP32 digital/serial demonstration and Python visualization.
 
-## Future Validation
+## Final Hardware Validation Plan
 
-Future hardware validation should proceed stage by stage:
+Validation should proceed stage by stage:
 
-1. Verify controller peripherals.
-2. Verify environmental-input acquisition.
+1. Verify STM32G4 peripherals.
+2. Verify environmental-input acquisition where implemented.
 3. Verify waveform samples.
-4. Verify DAC output.
+4. Verify high-speed DAC output.
 5. Verify filtering.
-6. Verify amplifier/MOSFET operation.
-7. Verify transducer interface.
-8. Add receiver-based target observation.
-9. Measure waveform characteristics and power.
-10. Perform controlled underwater testing.
+6. Verify MOSFET/power-stage operation.
+7. Verify amplifier output.
+8. Verify transducer/test-load interface.
+9. Capture the electrical waveform with the oscilloscope.
+10. Add receiver-based target observation.
+11. Measure waveform characteristics and power.
+12. Perform controlled underwater testing.
 
 No physical acoustic-performance claim should be made until the corresponding hardware stage has been measured.
