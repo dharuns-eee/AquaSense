@@ -1,12 +1,12 @@
 # AquaSense Results
 
-This folder contains the **final competition demonstration outputs** for the AquaSense adaptive SONAR transmission prototype.
+This folder contains the **basic digital prototype demonstration outputs** for the AquaSense adaptive SONAR transmission concept. These results are not the final physical hardware demonstration.
 
-## Final Demonstration Outputs
+## Basic Prototype Demonstration Outputs
 
 ### 1. Stationary Target — LFM → PCP
 
-The stationary-target demonstration uses the sequence:
+The stationary-target basic demonstration uses the sequence:
 
 `LFM → PCP`
 
@@ -16,7 +16,7 @@ The figure shows the generated LFM waveform, Hann-windowed FFT, PCP phase-code w
 
 ### 2. Non-Stationary Target — HFM → LFM → PCP
 
-The non-stationary-target demonstration uses the sequence:
+The non-stationary-target basic demonstration uses the sequence:
 
 `HFM → LFM → PCP`
 
@@ -24,9 +24,13 @@ The non-stationary-target demonstration uses the sequence:
 
 The figure shows the generated HFM and LFM waveforms, Hann-windowed FFT results, PCP phase-code waveform, PCP FFT, and the combined transmission views.
 
+### 3. Basic Prototype Video
+
+`AquaSense_Final_Demo.mp4` is the **current basic ESP32/Python demonstration recording**. The filename is retained for compatibility with the uploaded repository artifact, but the video itself must be described as a basic prototype demo, not the final hardware demo.
+
 ## Prototype Configuration
 
-| Parameter | Current prototype |
+| Parameter | Current basic prototype |
 |---|---|
 | Controller | ESP32 |
 | Sampling rate | 1 MHz |
@@ -50,11 +54,11 @@ The target state in this prototype is **software-commanded/simulated** because a
 
 ## Important Note on the FFT Display
 
-The Python dashboard includes a controlled presentation spectrum so that the competition demonstration clearly shows the intended frequency-domain behaviour. It is **not a measured underwater acoustic spectrum** and should not be presented as a physical measurement.
+The Python dashboard includes a controlled presentation spectrum so that the basic prototype demonstration clearly shows the intended frequency-domain behaviour. It is **not a measured underwater acoustic spectrum** and should not be presented as a physical measurement.
 
 ## Evidence Classification
 
-The files in this folder are **prototype demonstration evidence**. They document the current ESP32 + Python implementation and its software-generated waveform/FFT visualizations.
+The files in this folder are **basic prototype demonstration evidence**. They document the current ESP32 + Python implementation and its software-generated waveform/FFT visualizations.
 
 They should not be interpreted as:
 
@@ -63,6 +67,24 @@ They should not be interpreted as:
 - transducer performance measurements, or
 - quantitative power measurements.
 
-## Future Physical Validation
+## Planned Final Hardware Demonstration
 
-Future experimental results may include DAC output captures, filtered/amplified waveform measurements, transducer/receiver measurements, oscilloscope captures, measured FFT/spectrograms, processing-time measurements, and power measurements.
+The final AquaSense hardware demonstration will use an **STM32G4-based physical transmitter chain**, with an **oscilloscope** used to verify the electrical waveform.
+
+```text
+STM32G4
+   ↓
+High-Speed DAC
+   ↓
+Low-Pass Filter
+   ↓
+MOSFET Switching / Power Stage
+   ↓
+Amplifier
+   ↓
+SONAR Transducer / Test Load
+   ↓
+Oscilloscope
+```
+
+Future final-hardware results may include DAC output captures, filtered/amplified waveform measurements, oscilloscope captures, measured FFT/spectrograms, processing-time measurements and power measurements.
